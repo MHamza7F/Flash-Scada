@@ -32,6 +32,8 @@ public class PushTelemetryIngestService : IPushTelemetryIngestService
             ["Totalizer"] = "AccumulatedTotalizer",
             ["AccumulatedTotalizer"] = "AccumulatedTotalizer",
             ["Total"] = "AccumulatedTotalizer",
+            ["TotalKW"] = "InstantaneousFlowRate",
+            ["KWh"] = "AccumulatedTotalizer",
         };
 
     private readonly IDeviceRepository _deviceRepository;
@@ -169,19 +171,19 @@ public class PushTelemetryIngestService : IPushTelemetryIngestService
         return result;
     }
 
-    // Source IP is the primary attribution key (the Norvi payload carries no
-    // device id); an explicit deviceId/externalId in the payload is the fallback.
+    // Prefer the explicit external ID; source IP is a fallback for older firmware.
     private async Task<Domain.Entities.Device?> ResolveDeviceAsync(PushTelemetryMessageDto message, CancellationToken ct)
     {
+        if (!string.IsNullOrWhiteSpace(message.DeviceExternalId))
+        {
+            var byExternalId = await _deviceRepository.GetByExternalIdAsync(message.DeviceExternalId.Trim(), ct);
+            if (byExternalId is not null) return byExternalId;
+        }
+
         if (!string.IsNullOrWhiteSpace(message.SourceIpAddress))
         {
             var byIp = await _deviceRepository.GetByIpAddressAsync(message.SourceIpAddress.Trim(), ct);
             if (byIp is not null) return byIp;
-        }
-
-        if (!string.IsNullOrWhiteSpace(message.DeviceExternalId))
-        {
-            return await _deviceRepository.GetByExternalIdAsync(message.DeviceExternalId.Trim(), ct);
         }
 
         return null;

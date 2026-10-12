@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using scada_demo_test.Domain.Drivers;
 using ScadaEngine.Core.Drivers;
 using ScadaEngine.Core.Models;
@@ -13,6 +13,8 @@ public class FingerprintTests
     [InlineData("AOSONG_AQ3485")]
     [InlineData("VORTEX_FLOWMETER")]
     [InlineData("KAIFENG_EM_FLOWMETER")]
+    [InlineData("SELEC_POWER_METER")]
+[InlineData(" KAIFENG_FLOWMETER\)]
     [InlineData("SELEC_POWER_METER")]
     public void EveryDriverIdentifiesAtEveryValidAddress(string key)
     {

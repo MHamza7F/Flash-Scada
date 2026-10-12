@@ -1,0 +1,15 @@
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const root = path.join(__dirname, '../src/scada_demo_test.Web');
+const page = fs.readFileSync(`${root}/Pages/Tanks.razor`, 'utf8');
+const css = fs.readFileSync(`${root}/wwwroot/css/site.css`, 'utf8');
+assert.doesNotMatch(page, /ShowSampleTank|BuildSampleTank|Sample Storage Tank|DEMO-S01/);
+assert.match(page, /tkwater-/);
+assert.match(page, /tkmetal-/);
+assert.match(page, /tkclip-/);
+assert.doesNotMatch(page, /tk-wave|class="stream"|stroke="#76b8d5"/);
+assert.match(page, /Totalizer/);
+assert.match(page, /State\.Meters/);
+assert.match(css, /\.sidebar-nav::\-webkit-scrollbar/);
+console.log('Tank UI regression: real-only cylindrical asset and hidden sidebar scrollbar contracts passed.');

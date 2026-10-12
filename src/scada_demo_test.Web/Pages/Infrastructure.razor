@@ -42,14 +42,94 @@
          <div class="gateway-summary connection-card @(SelectedDevice.IsOnline ? "is-online" : "is-offline")"><div class="device-art"><img src="@DevicePhoto(SelectedDevice)" alt="@DeviceType(SelectedDevice) device" /></div><div><h2>@SelectedDevice.Name</h2><p>@SelectedDevice.HardwareType · @(SelectedDevice.IpAddress ?? "No address"):@SelectedDevice.Port</p><span class="status-badge @(SelectedDevice.IsOnline ? "online" : "offline")">@(SelectedDevice.IsOnline ? "Online" : "Offline")</span></div></div>
         <section class="infra-panel"><div class="infra-panel-heading"><div><h2>Connected sensors <small>/ Slave matrix</small></h2></div><span>Green · Online &nbsp; Red · Offline</span></div><div class="infra-toolbar"><input type="search" aria-label="Search sensors" placeholder="Search sensor, category, or slave ID…" @bind="SensorQuery" @bind:event="oninput" /><select aria-label="Filter sensor category" @bind="CategoryFilter"><option>All categories</option>@foreach (var c in CategoriesForSelection) { <option>@c</option> }</select><div class="infra-filters">@foreach (var f in SensorFilters) { <button class="@(SensorFilter == f ? "active" : "")" @onclick="() => SensorFilter = f">@f</button> }</div></div>
             @if (FilteredSensors.Count() == 0) { <div class="infra-empty">No sensors match the current search or filter.</div> }
-             else { @foreach (var group in FilteredSensors.GroupBy(CategoryOf).OrderBy(g => CategoryOrder.IndexOf(g.Key))) { <section class="sensor-group"><div class="sensor-group-heading"><h3>@group.Key</h3><span>@group.Count() sensors</span></div><div class="sensor-grid">@foreach (var sensor in group) { var metrics = FreshMetrics(sensor).OrderByDescending(x => x.Value.Seen).ToList(); var online = SensorOnline(sensor); <button class="sensor-card connection-card @(online ? "is-online" : "is-offline")" @onclick="() => OpenSensor(sensor)"><div class="sensor-top"><span class="slave-label">Slave @sensor.SlaveAddress</span><span class="status-badge @(online ? "online" : "offline")">@(online ? "online" : "offline")</span></div><div class="sensor-symbol">⌁</div><h4>@sensor.Name</h4><p>@DriverName(sensor)</p>@if (online && metrics.Count > 0) { var metric = metrics[0]; <div class="reading"><strong>@metric.Value.Value.ToString("0.##")</strong><span>@(metric.Value.Unit ?? "")</span></div><div class="sensor-updated">@metric.Key · Live · @metric.Value.Seen.ToLocalTime().ToString("HH:mm:ss")</div> } else { <div class="offline-note">No live reading</div> }<footer>@(sensor.LatestTimestampUtc.HasValue ? $"Updated {sensor.LatestTimestampUtc.Value.ToLocalTime():HH:mm:ss}" : "No sample available")</footer></button> }</div></section> } }
+             else
+             {
+                <div class="sensor-grid">
+                    @foreach (var sensor in FilteredSensors.OrderBy(s => CategoryOrder.IndexOf(CategoryOf(s))).ThenBy(s => s.Name))
+                    {
+                        var metrics = CardMetrics(sensor).OrderByDescending(x => x.Value.Seen).ToList();
+                        var online = SensorOnline(sensor);
+                        <button class="sensor-card connection-card @(online ? "is-online" : "is-offline")" @onclick="() => OpenSensor(sensor)">
+                            <div class="sensor-top">
+                                <span class="slave-label">Slave @sensor.SlaveAddress</span>
+                                <span class="status-badge @(online ? "online" : "offline")">@(online ? "online" : "offline")</span>
+                            </div>
+                            <span class="sensor-category">@CategoryOf(sensor)</span>
+                            <div class="sensor-symbol" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="8" />
+                                    <path d="M12 8v4l3 2" />
+                                </svg>
+                            </div>
+                            <h4>@sensor.Name</h4>
+                            <p>@DriverName(sensor)</p>
+                            @if (online && metrics.Count > 0)
+                            {
+                                var metric = metrics[0];
+                                <div class="reading"><strong>@metric.Value.Value.ToString("0.##")</strong><span>@(metric.Value.Unit ?? "")</span></div>
+                                <div class="sensor-updated">@metric.Key · Updated @metric.Value.Seen.ToLocalTime().ToString("HH:mm:ss")</div>
+                            }
+                            else
+                            {
+                                <div class="offline-note">@(online ? "No saved reading available" : "No recent sensor data")</div>
+                            }
+                            <footer>@(sensor.LatestTimestampUtc.HasValue ? $"Updated {sensor.LatestTimestampUtc.Value.ToLocalTime():HH:mm:ss}" : "No sample available")</footer>
+                        </button>
+                    }
+                </div>
+            }
         </section>
     }
 </div>
 
 @if (DetailSensor is not null)
 {
-    <div class="infra-modal-backdrop" @onclick="CloseSensor"><div class="infra-modal" role="dialog" aria-modal="true" aria-labelledby="sensor-detail-title" tabindex="-1" @onkeydown="HandleModalKey" @onclick:stopPropagation><button class="modal-close" autofocus aria-label="Close sensor detail" @onclick="CloseSensor">×</button><div class="infra-eyebrow">Sensor detail</div><h2 id="sensor-detail-title">@DetailSensor.Name</h2><p>@DetailSensor.UniqueSensorId · @DriverName(DetailSensor) · @CategoryOf(DetailSensor)</p><div class="detail-stats"><div><strong>@DetailValue</strong><span>@DetailUnit</span></div><div><strong>@(SensorOnline(DetailSensor) ? "Online" : "Offline / stale")</strong><span>Status</span></div><div><strong>@DetailSensor.SlaveAddress</strong><span>Modbus slave</span></div></div><dl class="detail-meta"><div><dt>Device</dt><dd>@DetailSensor.DeviceName</dd></div><div><dt>Gateway</dt><dd>@(SelectedDevice?.IpAddress ?? "—"):@(SelectedDevice?.Port)</dd></div><div><dt>Category</dt><dd>@CategoryOf(DetailSensor)</dd></div><div><dt>Updated</dt><dd>@(DetailSensor.LatestTimestampUtc?.ToLocalTime().ToString("g") ?? "No updated reading")</dd></div></dl><h3>Recent history</h3>@if (DetailHistory.Count > 0) { <table class="history-table"><caption>Real samples · primary value (@DetailUnit)</caption><thead><tr><th scope="col">Time</th><th scope="col">Value</th></tr></thead><tbody>@foreach (var point in DetailHistory.TakeLast(30).Reverse()) { <tr><td>@point.TimestampUtc.ToLocalTime().ToString("g")</td><td>@point.PrimaryValue.ToString("0.##") @(DetailUnit == "No live reading" ? "" : DetailUnit)</td></tr> }</tbody></table> } else { <div class="offline-note">No real history samples available.</div> }</div></div>
+    <div class="infra-modal-backdrop" @onclick="CloseSensor">
+        <div class="infra-modal sensor-detail-modal" role="dialog" aria-modal="true" aria-labelledby="sensor-detail-title" tabindex="-1" @onkeydown="HandleModalKey" @onclick:stopPropagation>
+            <button class="modal-close" autofocus aria-label="Close sensor detail" @onclick="CloseSensor">×</button>
+            <div class="sensor-detail-summary">
+                <div class="infra-eyebrow">Sensor detail</div>
+                <h2 id="sensor-detail-title">@DetailSensor.Name</h2>
+                <p>@DetailSensor.UniqueSensorId · @DriverName(DetailSensor) · @CategoryOf(DetailSensor)</p>
+                <div class="detail-stats">
+                    <div><strong>@DetailValue</strong><span>@DetailUnit</span></div>
+                    <div><strong>@(SensorOnline(DetailSensor) ? "Online" : "Offline / stale")</strong><span>Status</span></div>
+                    <div><strong>@DetailSensor.SlaveAddress</strong><span>Modbus slave</span></div>
+                </div>
+                <dl class="detail-meta">
+                    <div><dt>Device</dt><dd>@DetailSensor.DeviceName</dd></div>
+                    <div><dt>Gateway</dt><dd>@(SelectedDevice?.IpAddress ?? "—"):@(SelectedDevice?.Port)</dd></div>
+                    <div><dt>Category</dt><dd>@CategoryOf(DetailSensor)</dd></div>
+                    <div><dt>Updated</dt><dd>@(DetailSensor.LatestTimestampUtc?.ToLocalTime().ToString("g") ?? "No updated reading")</dd></div>
+                </dl>
+            </div>
+            <section class="sensor-history">
+                <h3>Recent history</h3>
+                <div class="sensor-history-scroll">
+                    @if (DetailHistory.Count > 0)
+                    {
+                        <table class="history-table">
+                            <caption>Real samples · primary value (@DetailUnit)</caption>
+                            <thead><tr><th scope="col">Time</th><th scope="col">Value</th></tr></thead>
+                            <tbody>
+                                @foreach (var point in DetailHistory.TakeLast(50).Reverse())
+                                {
+                                    <tr>
+                                        <td>@point.TimestampUtc.ToLocalTime().ToString("g")</td>
+                                        <td>@point.PrimaryValue.ToString("0.##") @(DetailUnit == "No reading" ? "" : DetailUnit)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="offline-note">No real history samples available.</div>
+                    }
+                </div>
+            </section>
+        </div>
+    </div>
 }
 
 @code {
@@ -68,8 +148,8 @@
     private IEnumerable<ScadaDemoTestApiClient.AttachedSensorDto> SelectedSensors => SelectedDevice is null ? [] : Sensors.Where(s => s.DeviceId == SelectedDevice.Id);
     private IEnumerable<ScadaDemoTestApiClient.AttachedSensorDto> FilteredSensors => SelectedSensors.Where(s => (string.IsNullOrWhiteSpace(SensorQuery) || $"{s.Name} {s.UniqueSensorId} {s.SensorTypeKey} {CategoryOf(s)}".Contains(SensorQuery, StringComparison.OrdinalIgnoreCase)) && (CategoryFilter == "All categories" || CategoryOf(s) == CategoryFilter) && (SensorFilter == "All sensors" || (SensorFilter == "Online" ? SensorOnline(s) : !SensorOnline(s))));
     private IEnumerable<string> CategoriesForSelection => SelectedSensors.Select(CategoryOf).Distinct().OrderBy(c => CategoryOrder.IndexOf(c));
-    private string DetailValue => DetailSensor is null ? "—" : SensorOnline(DetailSensor) && FreshMetrics(DetailSensor).OrderByDescending(v => v.Value.Seen).FirstOrDefault() is { } m ? m.Value.Value.ToString("0.##") : "—";
-    private string DetailUnit => DetailSensor is null ? "No live reading" : SensorOnline(DetailSensor) && FreshMetrics(DetailSensor).OrderByDescending(v => v.Value.Seen).FirstOrDefault() is { } m ? m.Value.Unit ?? "" : "No live reading";
+    private string DetailValue => DetailSensor is null ? "—" : SensorOnline(DetailSensor) && CardMetrics(DetailSensor).OrderByDescending(v => v.Value.Seen).FirstOrDefault() is { } m ? m.Value.Value.ToString("0.##") : "—";
+    private string DetailUnit => DetailSensor is null ? "No reading" : SensorOnline(DetailSensor) && CardMetrics(DetailSensor).OrderByDescending(v => v.Value.Seen).FirstOrDefault() is { } m ? m.Value.Unit ?? "" : "No reading";
     protected override async Task OnInitializedAsync() { Live.OnChange += OnLiveChange; await Live.EnsureConnectedAsync(); await RefreshAsync(_disposeCts.Token); _ = RefreshLoopAsync(_disposeCts.Token); }
     private async Task RefreshLoopAsync(CancellationToken token) { _refreshTimer = new PeriodicTimer(TimeSpan.FromSeconds(5)); try { while (await _refreshTimer.WaitForNextTickAsync(token)) await RefreshAsync(token); } catch (OperationCanceledException) { } catch { /* circuit shutdown */ } }
     private async Task RefreshAsync(CancellationToken token) { try { var selectionVersion = _selectionVersion; var detailVersion = _detailVersion; var selectedDeviceId = SelectedDevice?.Id; var detailSensorId = DetailSensor?.Id; var devices = await Api.GetGatewayDevicesAsync(); token.ThrowIfCancellationRequested(); var sensors = await Api.GetSensorsAsync(); token.ThrowIfCancellationRequested(); Devices = devices.OrderBy(d => d.Name).ToList(); Sensors = sensors.Where(s => s.IsActive).ToList(); if (_selectionVersion == selectionVersion) SelectedDevice = selectedDeviceId is Guid did ? Devices.FirstOrDefault(d => d.Id == did) : null; else if (SelectedDevice is { } currentDevice) SelectedDevice = Devices.FirstOrDefault(d => d.Id == currentDevice.Id); if (_detailVersion == detailVersion) DetailSensor = detailSensorId is Guid sid ? Sensors.FirstOrDefault(s => s.Id == sid) : null; else if (DetailSensor is { } currentSensor) DetailSensor = Sensors.FirstOrDefault(s => s.Id == currentSensor.Id); if (SelectedDevice is null) DetailSensor = null; Error = null; } catch (OperationCanceledException) { } catch (Exception ex) { if (!token.IsCancellationRequested) Error = $"Infrastructure could not be refreshed: {ex.Message}"; } finally { Loading = false; if (!token.IsCancellationRequested) { try { await InvokeAsync(StateHasChanged); } catch (ObjectDisposedException) { } catch (InvalidOperationException) { } } } }
@@ -87,7 +167,39 @@
     private string CategoryOf(ScadaDemoTestApiClient.AttachedSensorDto s) { var driver = $"{s.SensorTypeKey} {s.DriverDisplayName}"; var name = s.Name; if (driver.Contains("gas", StringComparison.OrdinalIgnoreCase) || name.Contains("gas", StringComparison.OrdinalIgnoreCase)) return "Gas"; if (driver.Contains("steam", StringComparison.OrdinalIgnoreCase) || name.Contains("steam", StringComparison.OrdinalIgnoreCase) || name.Contains("boiler", StringComparison.OrdinalIgnoreCase)) return "Steam"; if (driver.Contains("ph", StringComparison.OrdinalIgnoreCase) || name.Contains("ph", StringComparison.OrdinalIgnoreCase) || name.Contains("chlor", StringComparison.OrdinalIgnoreCase) || name.Contains("turb", StringComparison.OrdinalIgnoreCase)) return "Water Quality"; if (driver.Contains("temp", StringComparison.OrdinalIgnoreCase) || driver.Contains("humid", StringComparison.OrdinalIgnoreCase) || name.Contains("temperature", StringComparison.OrdinalIgnoreCase)) return "Temperature & RH"; if (driver.Contains("power", StringComparison.OrdinalIgnoreCase) || name.Contains("current", StringComparison.OrdinalIgnoreCase) || name.Contains("vibr", StringComparison.OrdinalIgnoreCase)) return "Electrical & Mechanical"; if (driver.Contains("air", StringComparison.OrdinalIgnoreCase) || name.Contains("pressure", StringComparison.OrdinalIgnoreCase)) return "Air"; if (driver.Contains("flow", StringComparison.OrdinalIgnoreCase) || name.Contains("water", StringComparison.OrdinalIgnoreCase) || name.Contains("level", StringComparison.OrdinalIgnoreCase)) return "Water"; return "Other"; }
     private LiveTelemetryState.MeterState? Snapshot(ScadaDemoTestApiClient.AttachedSensorDto s) => Live.GetMeterSnapshot(s.UniqueSensorId);
     private IEnumerable<KeyValuePair<string, (double Value, string? Unit, DateTime Seen)>> FreshMetrics(ScadaDemoTestApiClient.AttachedSensorDto s) { var snapshot = Snapshot(s); if (snapshot is null) return []; var selected = SelectedMetricKeys(s); var cutoff = DateTime.UtcNow.AddSeconds(-60); return snapshot.Values.Where(v => selected.Contains(v.Key) && v.Value.Seen >= cutoff); }
-    private static HashSet<string> SelectedMetricKeys(ScadaDemoTestApiClient.AttachedSensorDto s) { if (string.IsNullOrWhiteSpace(s.MetricFields)) return []; try { return (JsonSerializer.Deserialize<Dictionary<string, string>>(s.MetricFields) ?? []).Keys.ToHashSet(StringComparer.OrdinalIgnoreCase); } catch { return []; } }
-    private bool SensorOnline(ScadaDemoTestApiClient.AttachedSensorDto s) => Error is null && Live.IsConnected && s.IsOnline && Snapshot(s)?.IsOnline == true && FreshMetrics(s).Any();
+    private static HashSet<string> SelectedMetricKeys(ScadaDemoTestApiClient.AttachedSensorDto s)
+    {
+        if (string.IsNullOrWhiteSpace(s.MetricFields))
+        {
+            return s.SensorTypeKey.Equals("AOSONG_AQ3485", StringComparison.OrdinalIgnoreCase)
+                ? new HashSet<string>(["TemperatureC", "HumidityRH"], StringComparer.OrdinalIgnoreCase)
+                : new HashSet<string>(["InstantaneousFlowRate", "AccumulatedTotalizer"], StringComparer.OrdinalIgnoreCase);
+        }
+        try { return (JsonSerializer.Deserialize<Dictionary<string, string>>(s.MetricFields) ?? []).Keys.ToHashSet(StringComparer.OrdinalIgnoreCase); }
+        catch { return []; }
+    }
+    private IEnumerable<KeyValuePair<string, (double Value, string? Unit, DateTime Seen)>> CardMetrics(ScadaDemoTestApiClient.AttachedSensorDto s)
+    {
+        var live = FreshMetrics(s).ToList();
+        if (live.Count > 0) return live;
+
+        var primaryKey = s.SensorTypeKey.Equals("AOSONG_AQ3485", StringComparison.OrdinalIgnoreCase)
+            ? "TemperatureC"
+            : "InstantaneousFlowRate";
+        var secondaryKey = s.SensorTypeKey.Equals("AOSONG_AQ3485", StringComparison.OrdinalIgnoreCase)
+            ? "HumidityRH"
+            : "AccumulatedTotalizer";
+        var selected = SelectedMetricKeys(s);
+        var seen = s.LatestTimestampUtc ?? DateTime.MinValue;
+        var saved = new List<KeyValuePair<string, (double Value, string? Unit, DateTime Seen)>>();
+
+        if (s.LatestPrimary.HasValue && selected.Contains(primaryKey))
+            saved.Add(new(primaryKey, (s.LatestPrimary.Value, s.UnitPrimary, seen)));
+        if (s.LatestSecondary.HasValue && selected.Contains(secondaryKey))
+            saved.Add(new(secondaryKey, (s.LatestSecondary.Value, s.UnitSecondary, seen)));
+
+        return saved;
+    }
+    private bool SensorOnline(ScadaDemoTestApiClient.AttachedSensorDto s) => Error is null && s.IsOnline;
     public void Dispose() { Live.OnChange -= OnLiveChange; _disposeCts.Cancel(); _historyCts?.Cancel(); _historyCts?.Dispose(); _refreshTimer?.Dispose(); _disposeCts.Dispose(); }
 }

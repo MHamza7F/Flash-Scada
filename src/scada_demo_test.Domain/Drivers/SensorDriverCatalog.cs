@@ -17,7 +17,8 @@ public static class SensorDriverCatalog
         new AosongAQ3485Driver(),
         new ElectromagneticFlowmeterDriver(),
         new VortexFlowmeterDriver(),
-        new SelecPowerMeterDriver()
+        new SelecPowerMeterDriver(),
+        new KaifengFlowmeterDriver()
     };
 
     private static readonly FrozenDictionary<string, ISensorDriver> DriversByKey =

@@ -38,8 +38,7 @@ public class TelemetryController : ControllerBase
         [JsonPropertyName("tankReadings")]
         public List<TankReadingItem> TankReadings { get; set; } = new();
 
-        // Optional explicit device attribution (the firmware does not send these -
-        // the source IP is matched against Devices.IpAddress instead).
+        // Explicit device attribution; externalId is sent by the Norvi firmware.
         [JsonPropertyName("deviceId")]
         public string? DeviceId { get; set; }
 
@@ -51,8 +50,8 @@ public class TelemetryController : ControllerBase
     // Body (sent as-is by the Norvi firmware, unchanged):
     // { "tank_id": 1, "tankReadings": [{"metric":"Flowrate","value":12.3,"unit":"Nm3h"}, ...] }
     //
-    // The device is attributed by the TCP source IP -> Devices.IpAddress (fallback:
-    // deviceId/externalId in the payload). Unknown devices/sensors are dropped with
+    // The device is attributed by externalId (fallback: TCP source IP -> Devices.IpAddress).
+    // Unknown devices/sensors are dropped with
     // a 200 response so the firmware never sees an error it cannot handle.
     [HttpPost("tank-reading")]
     public async Task<IActionResult> TankReading([FromBody] TankReadingRequest request)

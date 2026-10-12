@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Collections.Frozen;
 using System.Runtime.CompilerServices;
 using scada_demo_test.Domain.Drivers;
@@ -19,8 +19,9 @@ public static class SensorDriverDispatcher
 {
     private static readonly AosongAQ3485Driver AosongDriver = new();
     private static readonly VortexFlowmeterDriver VortexDriver = new();
-    private static readonly ElectromagneticFlowmeterDriver ElectromagneticDriver = new();
-    private static readonly SelecPowerMeterDriver SelecPowerDriver = new();
+        private static readonly ElectromagneticFlowmeterDriver ElectromagneticDriver = new();
+        private static readonly SelecPowerMeterDriver SelecPowerDriver = new();
+        private static readonly KaifengFlowmeterDriver KaifengDriver = new();
 
     /// <summary>
     /// O(1) In-Memory Routing Table mapping <see cref="DeviceProfileType"/> directly to its
@@ -32,7 +33,8 @@ public static class SensorDriverDispatcher
             [DeviceProfileType.AosongAQ3485] = AQ3485Ghar,
             [DeviceProfileType.V880BRVortex] = V880BRGhar,
             [DeviceProfileType.Electromagnetic] = ElectromagneticGhar,
-            [DeviceProfileType.SelecPower] = SelecPowerGhar
+            [DeviceProfileType.SelecPower] = SelecPowerGhar,
+            [DeviceProfileType.KaifengFlowmeter] = KaifengGhar
         }.ToFrozenDictionary();
 
     /// <summary>
@@ -64,7 +66,7 @@ public static class SensorDriverDispatcher
     /// Designated calculation home ("Ghar") for <see cref="DeviceProfileType.AosongAQ3485"/>.
     /// Decodes 4-byte Holding Register payload:
     ///   Register[0] (unsigned 16-bit / 10.0) -&gt; Relative Humidity (%RH)
-    ///   Register[1] (signed 16-bit / 10.0)   -&gt; Temperature (°C)
+    ///   Register[1] (signed 16-bit / 10.0)   -&gt; Temperature (Â°C)
     /// </summary>
     private static DriverCalculationResult AQ3485Ghar(ModbusDevicePacket packet)
     {
@@ -95,8 +97,8 @@ public static class SensorDriverDispatcher
     /// <summary>
     /// Designated calculation home ("Ghar") for <see cref="DeviceProfileType.V880BRVortex"/>.
     /// Decodes IEEE-754 High-Word-First 32-bit floats from Input Registers (FC04 @1026, @1032):
-    ///   Primary   -&gt; Instantaneous Flow Rate (m³/h)
-    ///   Secondary -&gt; Accumulated Totalizer (m³)
+    ///   Primary   -&gt; Instantaneous Flow Rate (mÂ³/h)
+    ///   Secondary -&gt; Accumulated Totalizer (mÂ³)
     /// </summary>
     private static DriverCalculationResult V880BRGhar(ModbusDevicePacket packet)
     {
@@ -129,8 +131,8 @@ public static class SensorDriverDispatcher
     /// <summary>
     /// Designated calculation home ("Ghar") for <see cref="DeviceProfileType.Electromagnetic"/>.
     /// Decodes IEEE-754 High-Word-First 32-bit floats for Kaifeng IEMFL Water Flowmeter:
-    ///   Window 0 (bytes 0..3 @ reg 90) -&gt; Accumulated Totalizer (m³)
-    ///   Window 1 (bytes 4..7 @ reg 98) -&gt; Instantaneous Flow Rate (m³/h)
+    ///   Window 0 (bytes 0..3 @ reg 90) -&gt; Accumulated Totalizer (mÂ³)
+    ///   Window 1 (bytes 4..7 @ reg 98) -&gt; Instantaneous Flow Rate (mÂ³/h)
     /// </summary>
     private static DriverCalculationResult ElectromagneticGhar(ModbusDevicePacket packet)
     {
@@ -195,6 +197,31 @@ public static class SensorDriverDispatcher
             TimestampUtc: packet.Timestamp);
     }
 
+    private static DriverCalculationResult KaifengGhar(ModbusDevicePacket packet)
+    {
+        ArgumentNullException.ThrowIfNull(packet);
+        if (packet.ProfileType != DeviceProfileType.KaifengFlowmeter)
+            return InvalidResult(packet, "PROFILE_MISMATCH_KAIFENG");
+
+        var parsed = KaifengDriver.ParseData(packet.RawPayload);
+        if (!parsed.Success)
+            return InvalidResult(packet, parsed.ErrorCode ?? "PARSE_ERROR_KAIFENG");
+
+        return new DriverCalculationResult(
+            SlaveId: packet.SlaveId,
+            ProfileType: packet.ProfileType,
+            DriverKey: KaifengDriver.DriverKey,
+            ModelName: KaifengDriver.DisplayName,
+            IsValid: true,
+            PrimaryValue: parsed.PrimaryValue,
+            PrimaryColumnName: KaifengDriver.PrimaryColumnName,
+            PrimaryUnit: KaifengDriver.UnitPrimary,
+            SecondaryValue: parsed.SecondaryValue,
+            SecondaryColumnName: KaifengDriver.SecondaryColumnName,
+            SecondaryUnit: KaifengDriver.UnitSecondary,
+            RawHexPayload: packet.RawHex,
+            TimestampUtc: packet.Timestamp);
+    }
     private static DriverCalculationResult InvalidResult(ModbusDevicePacket packet, string errorCode) =>
         new(
             SlaveId: packet.SlaveId,

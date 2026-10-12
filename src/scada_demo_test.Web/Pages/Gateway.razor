@@ -1,4 +1,4 @@
-@using scada_demo_test.Web.Services
+﻿@using scada_demo_test.Web.Services
 @page "/gateway"
 @attribute [Authorize(Policy = "Tab:Gateway")]
 @inject ScadaDemoTestApiClient Api
@@ -6,8 +6,8 @@
 
 <div class="page-header-flex">
     <div>
-        <h1 class="page-title">Gateway — Smart RS-485 Bus Scan</h1>
-        <p class="page-subtitle">Add a gateway, find the meters wired to its RS-485 bus, then map them into sensors in one click — nothing is saved until you add</p>
+        <h1 class="page-title">Gateway â€” Smart RS-485 Bus Scan</h1>
+        <p class="page-subtitle">Add a gateway, find the meters wired to its RS-485 bus, then map them into sensors in one click â€” nothing is saved until you add</p>
     </div>
     <button class="btn-primary-scada" @onclick="OpenAddDeviceModal">
         <span>+ Add Gateway</span>
@@ -17,9 +17,9 @@
 @if (!string.IsNullOrEmpty(ToastMessage))
 {
     <div class="scada-toast @(ToastIsError ? "error" : "success")">
-        <span>@(ToastIsError ? "✕" : "✓")</span>
+        <span>@(ToastIsError ? "âœ•" : "âœ“")</span>
         <span>@ToastMessage</span>
-        <button class="toast-close" @onclick="() => ToastMessage = null">✕</button>
+        <button class="toast-close" @onclick="() => ToastMessage = null">âœ•</button>
     </div>
 }
 
@@ -44,7 +44,7 @@
 @if (GatewayDevices.Count == 0 && !Loading)
 {
     <div class="glass-card" style="text-align:center;padding:2.5rem;">
-        <div style="font-size:2rem;margin-bottom:0.5rem;">🔌</div>
+        <div style="font-size:2rem;margin-bottom:0.5rem;">ðŸ”Œ</div>
         <h3 style="color:var(--text-primary);margin-bottom:0.4rem;">No Gateways Configured</h3>
         <p style="color:var(--text-muted);font-size:0.9rem;">Register your USR-W610 Modbus TCP gateway using the <strong>+ Add Gateway</strong> button above, then scan its RS-485 bus to detect connected meters. Devices created from the Gateway tab appear only here.</p>
     </div>
@@ -52,7 +52,7 @@
 
 @if (Loading)
 {
-    <div class="glass-card" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading gateways…</div>
+    <div class="glass-card" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading gatewaysâ€¦</div>
 }
 else
 {
@@ -93,30 +93,30 @@ else
                             <div style="font-weight:700;color:var(--text-primary);">@(sensorCount) / @(capacity) Sensors</div>
                         </div>
                         <span style="font-size:0.75rem;font-weight:700;padding:0.3rem 0.75rem;border-radius:12px;background:@(d.IsOnline ? "rgba(16,185,129,0.15)" : "rgba(148,163,184,0.15)");color:@(d.IsOnline ? "var(--accent-emerald)" : "var(--text-muted)");">
-                            @(d.IsOnline ? "● ONLINE" : "○ OFFLINE")
+                            @(d.IsOnline ? "â— ONLINE" : "â—‹ OFFLINE")
                         </span>
                         <button class="btn-secondary-scada" style="font-size:0.75rem;padding:0.3rem 0.7rem;"
                                 @onclick="() => QuickScanFromCard(d)" @onclick:stopPropagation
                                 disabled="@(Scanning || string.IsNullOrWhiteSpace(d.IpAddress))">
-                            @(Scanning && SelectedGatewayGuid == d.Id && ScanModeLabel.Contains("Quick") ? "Scanning…" : "⚡ Quick 1-20")
+                            @(Scanning && SelectedGatewayGuid == d.Id && ScanModeLabel.Contains("Quick") ? "Scanningâ€¦" : "âš¡ Quick 1-20")
                         </button>
                         <button class="btn-secondary-scada" style="font-size:0.75rem;padding:0.3rem 0.7rem;"
                                 @onclick="() => FullScanFromCard(d)" @onclick:stopPropagation
                                 disabled="@(Scanning || string.IsNullOrWhiteSpace(d.IpAddress))">
-                            @(Scanning && SelectedGatewayGuid == d.Id && ScanModeLabel.Contains("Full") ? "Scanning…" : "🔍 Find Sensors")
+                            @(Scanning && SelectedGatewayGuid == d.Id && ScanModeLabel.Contains("Full") ? "Scanningâ€¦" : "ðŸ” Find Sensors")
                         </button>
                         <button class="btn-small" style="background:var(--accent-rose-light);color:var(--accent-rose);border:1px solid var(--accent-rose);border-radius:6px;padding:0.3rem 0.65rem;font-size:0.75rem;font-weight:600;"
                                 @onclick="() => PromptDeleteDevice(d)" @onclick:stopPropagation
                                 disabled="@DeleteBusy">
                             Delete Device
                         </button>
-                        <span style="color:var(--text-muted);font-size:0.85rem;transition:transform .2s;transform:rotate(@(isSelected ? "90" : "0")deg);">▶</span>
+                        <span style="color:var(--text-muted);font-size:0.85rem;transition:transform .2s;transform:rotate(@(isSelected ? "90" : "0")deg);">â–¶</span>
                     </div>
                 </div>
 
                 <div style="display:flex;align-items:center;gap:1rem;margin-top:0.6rem;padding:0.45rem 0.7rem;background:var(--bg-surface);border-radius:6px;border:1px solid var(--border);font-size:0.78rem;flex-wrap:wrap;">
                     <span style="font-weight:700;color:@(d.IsOnline ? "var(--accent-emerald)" : "var(--accent-rose)");">
-                        @(d.IsOnline ? "● DEVICE ONLINE" : "○ DEVICE OFFLINE")
+                        @(d.IsOnline ? "â— DEVICE ONLINE" : "â—‹ DEVICE OFFLINE")
                     </span>
                     <span style="color:var(--border)">|</span>
                     <span style="color:var(--text-muted);">Sensors: <strong style="color:var(--text-primary);">@d.SensorCount</strong>/@(capacity)</span>
@@ -164,7 +164,7 @@ else
                                     </span>
                                     <button class="btn-small" style="border:1px solid var(--border);padding:0.25rem 0.6rem;border-radius:6px;background:var(--bg-surface);color:var(--primary-blue);font-size:0.75rem;font-weight:600;"
                                             @onclick="() => OpenEditSensor(s)" @onclick:stopPropagation>
-                                        ⚙ Edit Parameters
+                                        âš™ Edit Parameters
                                     </button>
                                     <button class="btn-small" style="background:var(--accent-rose-light);color:var(--accent-rose);border:1px solid var(--accent-rose);border-radius:6px;padding:0.25rem 0.6rem;font-size:0.75rem;font-weight:600;"
                                             @onclick="() => PromptDeleteSensor(s)" @onclick:stopPropagation
@@ -178,7 +178,7 @@ else
                     else
                     {
                         <div style="color:var(--text-muted);font-size:0.8rem;padding:0.2rem 0;">
-                            No field sensors attached to this gateway yet — use <strong>🔍 Find Sensors</strong> to discover meters on its RS-485 bus.
+                            No field sensors attached to this gateway yet â€” use <strong>ðŸ” Find Sensors</strong> to discover meters on its RS-485 bus.
                         </div>
                     }
                 </div>
@@ -188,11 +188,11 @@ else
                     <div style="margin-top:0.7rem;padding-top:0.6rem;border-top:1px solid var(--border);" @onclick:stopPropagation>
                         @if (Scanning)
                         {
-                            <div style="color:var(--text-muted);font-size:0.78rem;">Scanning @(ScanModeLabel) — registered sensors auto-skipped…</div>
+                            <div style="color:var(--text-muted);font-size:0.78rem;">Scanning @(ScanModeLabel) â€” registered sensors auto-skippedâ€¦</div>
                         }
                         else if (string.IsNullOrWhiteSpace(d.IpAddress))
                         {
-                            <div style="color:var(--accent-rose);font-size:0.8rem;">No IP set — edit the gateway's IP address first.</div>
+                            <div style="color:var(--accent-rose);font-size:0.8rem;">No IP set â€” edit the gateway's IP address first.</div>
                         }
 
                         @if (ScanFailed && (LastScan == null || ((LastScan.Found?.Count ?? 0) == 0 && (LastScan.DuplicateIdConflicts?.Count ?? 0) == 0 && (LastScan.AlreadyInSystemSlaves?.Count ?? 0) == 0)))
@@ -208,7 +208,7 @@ else
                             <div style="border:1px solid var(--border);border-radius:8px;padding:0.85rem 1rem;background:var(--bg-card);margin-top:0.6rem;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.6rem;">
                                     <div style="color:var(--text-primary);font-size:0.88rem;font-weight:700;">
-                                        Detected Meters — @(LastScan.Found?.Count ?? 0) (probe @LastScan.ProbeTimeoutMs ms, @LastScan.SlavesScanned addresses scanned)
+                                        Detected Meters â€” @(LastScan.Found?.Count ?? 0) (probe @LastScan.ProbeTimeoutMs ms, @LastScan.SlavesScanned addresses scanned)
                                     </div>
                                     <div style="display:flex;align-items:center;gap:0.8rem;">
                                         @if (LastScan.Found is { Count: > 0 })
@@ -217,7 +217,7 @@ else
                                                 <input type="checkbox" @bind="SelectAllFound" @bind:after="ToggleSelectAll" /> Select All
                                             </label>
                                         }
-                                        <button class="btn-small" style="border:none;background:transparent;color:var(--text-muted);font-size:0.9rem;" @onclick="ClearScan" @onclick:stopPropagation>✕</button>
+                                        <button class="btn-small" style="border:none;background:transparent;color:var(--text-muted);font-size:0.9rem;" @onclick="ClearScan" @onclick:stopPropagation>âœ•</button>
                                     </div>
                                 </div>
 
@@ -226,7 +226,7 @@ else
                                 {
                                     <div style="margin-bottom:0.75rem;padding:0.75rem;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:6px;">
                                         <div style="font-weight:700;font-size:0.82rem;color:var(--accent-amber);margin-bottom:0.35rem;display:flex;align-items:center;gap:0.4rem;">
-                                            <span>ℹ️</span>
+                                            <span>â„¹ï¸</span>
                                             <span>Already Added in System (@LastScan.AlreadyInSystemSlaves.Count)</span>
                                         </div>
 
@@ -235,7 +235,7 @@ else
                                                 <div style="font-size:0.78rem;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                                                     <span style="font-weight:700;background:rgba(245,158,11,0.2);color:var(--accent-amber);padding:1px 6px;border-radius:4px;font-family:monospace;">Slave @a.SlaveAddress</span>
                                                     <span style="font-weight:600;">@(string.IsNullOrWhiteSpace(a.ExistingSensorName) ? "Active Sensor" : a.ExistingSensorName)</span>
-                                                    <span style="color:var(--text-muted);font-size:0.74rem;">— @a.Message</span>
+                                                    <span style="color:var(--text-muted);font-size:0.74rem;">â€” @a.Message</span>
                                                 </div>
                                             }
                                         </div>
@@ -247,7 +247,7 @@ else
                                 {
                                     <div style="margin-bottom:0.85rem;padding:0.85rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.35);border-radius:8px;">
                                         <div style="font-weight:700;font-size:0.85rem;color:var(--accent-rose);margin-bottom:0.35rem;display:flex;align-items:center;gap:0.4rem;">
-                                            <span>⛔</span>
+                                            <span>â›”</span>
                                             <span>Duplicate Slave ID (@LastScan.DuplicateIdConflicts.Count)</span>
                                         </div>
                                         <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">
@@ -262,7 +262,7 @@ else
                                                             Slave ID @c.SlaveAddress
                                                         </span>
                                                         <span style="font-size:0.75rem;color:var(--accent-rose);font-weight:700;">
-                                                            ⚠️ @c.SensorCount meter(s) answering on this ID
+                                                            âš ï¸ @c.SensorCount meter(s) answering on this ID
                                                         </span>
                                                     </div>
 
@@ -278,7 +278,7 @@ else
                                                                 </span>
                                                                 @if (nIdx < c.CollidingMeterNames.Count - 1)
                                                                 {
-                                                                    <span style="font-size:0.72rem;color:var(--accent-rose);font-weight:800;">⚡ CONFLICT ⚡</span>
+                                                                    <span style="font-size:0.72rem;color:var(--accent-rose);font-weight:800;">âš¡ CONFLICT âš¡</span>
                                                                 }
                                                             }
                                                         </div>
@@ -304,7 +304,7 @@ else
                                 @* ================= BUCKET 3: UNIQUE FOUND DEVICES ("FOUND BOX") ================= *@
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.4rem;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.5rem;">
                                     <div style="font-weight:700;font-size:0.84rem;color:var(--accent-emerald);display:flex;align-items:center;gap:0.4rem;">
-                                        <span>✓</span>
+                                        <span>âœ“</span>
                                         <span>Verified Found Box (@(LastScan.Found?.Count(m => m.Status == "identified") ?? 0))</span>
                                     </div>
                                     @if (ConfirmSelection.Count > 0)
@@ -356,7 +356,7 @@ else
                                                         }
                                                         else
                                                         {
-                                                            <text>Responded but register map not recognized — can't map automatically.</text>
+                                                            <text>Responded but register map not recognized â€” can't map automatically.</text>
                                                         }
                                                     </div>
                                                 </div>
@@ -406,7 +406,7 @@ else
                                                 @p.SensorName
                                                 @if (p.Added)
                                                 {
-                                                    <span style="color:var(--accent-emerald);font-size:0.75rem;font-weight:700;"> ✓ Added</span>
+                                                    <span style="color:var(--accent-emerald);font-size:0.75rem;font-weight:700;"> âœ“ Added</span>
                                                 }
                                             </div>
                                             <div style="color:var(--text-muted);font-size:0.76rem;">
@@ -452,7 +452,7 @@ else
         <div class="modal-card glass-card" style="min-width:480px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3>Add Gateway</h3>
-                <button class="modal-close" @onclick="() => ShowDeviceModal = false">✕</button>
+                <button class="modal-close" @onclick="() => ShowDeviceModal = false">âœ•</button>
             </div>
             <div class="modal-body">
                 <div class="form-grid-2">
@@ -498,15 +498,15 @@ else
                 </div>
                 @if (DeviceFormSuccess != null)
                 {
-                    <div class="modal-alert success">✓ @DeviceFormSuccess</div>
+                    <div class="modal-alert success">âœ“ @DeviceFormSuccess</div>
                 }
                 @if (DeviceFormError != null)
                 {
-                    <div class="modal-alert error">✕ @DeviceFormError</div>
+                    <div class="modal-alert error">âœ• @DeviceFormError</div>
                 }
                 @if (DeviceIpMessage != null)
                 {
-                    <div class="modal-alert warning">⚠️ @DeviceIpMessage</div>
+                    <div class="modal-alert warning">âš ï¸ @DeviceIpMessage</div>
                 }
             </div>
             <div class="modal-footer">
@@ -527,7 +527,7 @@ else
         <div class="modal-card glass-card" style="min-width:500px;">
             <div class="modal-header">
                 <h3>Configure &amp; Add Sensor</h3>
-                <button class="modal-close" @onclick="() => Configuring = null">✕</button>
+                <button class="modal-close" @onclick="() => Configuring = null">âœ•</button>
             </div>
             <div class="modal-body">
                 <div style="padding:0.5rem 0.6rem;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);margin-bottom:0.9rem;">
@@ -585,7 +585,7 @@ else
                     </div>
                     @if (cfg.SelectedParams.Count == 0)
                     {
-                        <div class="modal-alert warning" style="margin-top:0.5rem;">⚠️ Select at least one parameter to add this sensor.</div>
+                        <div class="modal-alert warning" style="margin-top:0.5rem;">âš ï¸ Select at least one parameter to add this sensor.</div>
                     }
                 </div>
 
@@ -594,7 +594,7 @@ else
                     <div class="tank-toggle-box">
                         <div>
                             <div class="tank-toggle-title">Storage Tank asset</div>
-                            <div class="tank-toggle-hint">Level = Totalizer ÷ capacity — shows on the Storage Tanks page</div>
+                            <div class="tank-toggle-hint">Level = Totalizer Ã· capacity â€” shows on the Storage Tanks page</div>
                         </div>
                         <input type="checkbox" @bind="cfg.IsTank" class="tank-checkbox" />
                     </div>
@@ -602,7 +602,7 @@ else
                     {
                         <div class="form-grid-2" style="margin-top:0.5rem;">
                             <div class="form-group">
-                                <label>Capacity (m³)</label>
+                                <label>Capacity (mÂ³)</label>
                                 <input type="number" step="0.1" min="0" class="custom-input" @bind="cfg.TankCapacity" />
                             </div>
                             <div class="form-group">
@@ -615,11 +615,11 @@ else
 
                 @if (ConfigSlaveMessage != null)
                 {
-                    <div class="modal-alert warning">⚠️ @ConfigSlaveMessage</div>
+                    <div class="modal-alert warning">âš ï¸ @ConfigSlaveMessage</div>
                 }
                 @if (ConfigFormError != null)
                 {
-                    <div class="modal-alert error">✕ @ConfigFormError</div>
+                    <div class="modal-alert error">âœ• @ConfigFormError</div>
                 }
             </div>
             <div class="modal-footer">
@@ -640,7 +640,7 @@ else
         <div class="modal-card glass-card" style="min-width:480px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3>Edit Sensor Parameters</h3>
-                <button class="modal-close" @onclick="() => EditingSensor = null">✕</button>
+                <button class="modal-close" @onclick="() => EditingSensor = null">âœ•</button>
             </div>
             <div class="modal-body">
                 <div style="padding:0.5rem 0.6rem;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);margin-bottom:0.9rem;">
@@ -694,7 +694,7 @@ else
                     </div>
                     @if (EditingSensor.SelectedParams.Count == 0)
                     {
-                        <div class="modal-alert warning" style="margin-top:0.5rem;">⚠️ Select at least one parameter for this sensor.</div>
+                        <div class="modal-alert warning" style="margin-top:0.5rem;">âš ï¸ Select at least one parameter for this sensor.</div>
                     }
                 </div>
 
@@ -703,7 +703,7 @@ else
                     <div class="tank-toggle-box" style="margin-top:0.6rem;">
                         <div>
                             <div class="tank-toggle-title">Storage Tank asset</div>
-                            <div class="tank-toggle-hint">Level = Totalizer ÷ capacity — shows on the Storage Tanks page</div>
+                            <div class="tank-toggle-hint">Level = Totalizer Ã· capacity â€” shows on the Storage Tanks page</div>
                         </div>
                         <input type="checkbox" @bind="EditingSensor.IsTank" class="tank-checkbox" />
                     </div>
@@ -711,7 +711,7 @@ else
                     {
                         <div class="form-grid-2" style="margin-top:0.5rem;">
                             <div class="form-group">
-                                <label>Capacity (m³)</label>
+                                <label>Capacity (mÂ³)</label>
                                 <input type="number" step="0.1" min="0" class="custom-input" @bind="EditingSensor.TankCapacity" />
                             </div>
                             <div class="form-group">
@@ -724,7 +724,7 @@ else
 
                 @if (EditFormError != null)
                 {
-                    <div class="modal-alert error">✕ @EditFormError</div>
+                    <div class="modal-alert error">âœ• @EditFormError</div>
                 }
             </div>
             <div class="modal-footer">
@@ -745,7 +745,7 @@ else
         <div class="modal-card glass-card" style="min-width:440px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3 style="color:var(--accent-rose);">Delete Gateway Device</h3>
-                <button class="modal-close" @onclick="() => DeviceToDelete = null">✕</button>
+                <button class="modal-close" @onclick="() => DeviceToDelete = null">âœ•</button>
             </div>
             <div class="modal-body">
                 <p style="color:var(--text-muted);font-size:0.9rem;">
@@ -759,7 +759,7 @@ else
                 <button class="btn-secondary-scada" @onclick="() => DeviceToDelete = null" disabled="@DeleteBusy">Cancel</button>
                                 <button class="btn-primary-scada" style="background:var(--accent-rose);border-color:var(--accent-rose);"
                         @onclick="ConfirmDeleteDeviceAsync" disabled="@DeleteBusy">
-                    @(DeleteBusy ? "Deleting…" : "Confirm Delete Gateway")
+                    @(DeleteBusy ? "Deletingâ€¦" : "Confirm Delete Gateway")
                 </button>
             </div>
         </div>
@@ -773,7 +773,7 @@ else
         <div class="modal-card glass-card" style="min-width:440px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3 style="color:var(--accent-rose);">Delete Field Sensor</h3>
-                <button class="modal-close" @onclick="() => SensorToDelete = null">✕</button>
+                <button class="modal-close" @onclick="() => SensorToDelete = null">âœ•</button>
             </div>
             <div class="modal-body">
                 <p style="color:var(--text-muted);font-size:0.9rem;">
@@ -787,7 +787,7 @@ else
                 <button class="btn-secondary-scada" @onclick="() => SensorToDelete = null" disabled="@DeleteBusy">Cancel</button>
                                 <button class="btn-primary-scada" style="background:var(--accent-rose);border-color:var(--accent-rose);"
                         @onclick="ConfirmDeleteSensorAsync" disabled="@DeleteBusy">
-                    @(DeleteBusy ? "Deleting…" : "Confirm Delete Sensor")
+                    @(DeleteBusy ? "Deletingâ€¦" : "Confirm Delete Sensor")
                 </button>
             </div>
         </div>
@@ -837,24 +837,24 @@ else
         {
             ["AOSONG_AQ3485"] = new()
             {
-                new("TemperatureC", "Temperature", "°C"),
+                new("TemperatureC", "Temperature", "Â°C"),
                 new("HumidityRH", "Humidity", "%RH"),
             },
             ["KAIFENG_FLOWMETER"] = new()
             {
-                new("InstantaneousFlowRate", "Flow Rate", "Nm³/h"),
-                new("AccumulatedTotalizer", "Totalizer", "Nm³"),
+                new("InstantaneousFlowRate", "Flow Rate", "NmÂ³/h"),
+                new("AccumulatedTotalizer", "Totalizer", "NmÂ³"),
                 new("Velocity", "Velocity (metadata only)", "m/s"),
             },
             ["KAIFENG_EM_FLOWMETER"] = new()
             {
-                new("InstantaneousFlowRate", "Flow Rate", "m³/h"),
-                new("AccumulatedTotalizer", "Totalizer", "m³"),
+                new("InstantaneousFlowRate", "Flow Rate", "mÂ³/h"),
+                new("AccumulatedTotalizer", "Totalizer", "mÂ³"),
             },
             ["VORTEX_FLOWMETER"] = new()
             {
-                new("InstantaneousFlowRate", "Flow Rate", "m³/h"),
-                new("AccumulatedTotalizer", "Totalizer", "m³"),
+                new("InstantaneousFlowRate", "Flow Rate", "mÂ³/h"),
+                new("AccumulatedTotalizer", "Totalizer", "mÂ³"),
             },
             ["SELEC_POWER_METER"] = new()
             {
@@ -1159,7 +1159,7 @@ else
 
         if (PickedMeters.Count > 0)
         {
-            await ToastAsync($"{PickedMeters.Count} meter(s) selected — configure parameters for each one.", false);
+            await ToastAsync($"{PickedMeters.Count} meter(s) selected â€” configure parameters for each one.", false);
             OpenNextConfigure();
         }
         StateHasChanged();
@@ -1364,7 +1364,7 @@ else
                    PickedMeters.Any(p => p != Configuring && !p.Added && p.SlaveAddress == addr);
         if (used)
         {
-            ConfigSlaveMessage = $"Slave address {addr} is already used on this gateway — each meter needs a unique address.";
+            ConfigSlaveMessage = $"Slave address {addr} is already used on this gateway â€” each meter needs a unique address.";
         }
     }
 
@@ -1516,7 +1516,7 @@ else
         ShowDeviceModal = false;
         DeviceSubmitBusy = false;
         await LoadGatewaysAsync();
-        await ToastAsync($"Gateway '{data.Name}' registered — it will show ONLINE when reachable and OFFLINE when disconnected.", false);
+        await ToastAsync($"Gateway '{data.Name}' registered â€” it will show ONLINE when reachable and OFFLINE when disconnected.", false);
     }
 
     private static string MeterReading(ScadaDemoTestApiClient.ScannedMeterDto m)
@@ -1543,3 +1543,5 @@ else
         _timer?.Dispose();
     }
 }
+
+

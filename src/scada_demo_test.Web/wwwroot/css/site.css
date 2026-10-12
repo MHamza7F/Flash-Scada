@@ -254,7 +254,12 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
+  /* Keep the navigation scrollable when groups expand without showing a
+     second bright scrollbar that visually cuts through the sidebar. */
+  scrollbar-width: none;
 }
+
+.sidebar-nav::-webkit-scrollbar { width: 0; height: 0; }
 
 .nav-item {
   display: flex;
@@ -1747,7 +1752,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .modal-body {
   padding: 24px;
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  max-height: calc(90vh - 140px);
 }
 
 .modal-footer {
@@ -2794,6 +2800,16 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 
 .tk-body {
   padding: 14px 14px 10px;
+  background: color-mix(in srgb, var(--bg-card-subtle) 78%, #0f2732 22%);
+}
+
+.tk-svg-wrap {
+  position: relative;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--border-strong) 70%, #275366 30%);
+  border-radius: 10px;
+  padding: 4px;
+  background: radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--bg-card-hover) 76%, #315568 24%), var(--bg-card-subtle));
 }
 
 .tk-svg {
@@ -2802,6 +2818,15 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   display: block;
   border-radius: 10px;
 }
+
+.tk-scale-line { stroke: var(--text-light); stroke-width: 1; opacity: .65; }
+.tk-scale-text { fill: var(--text-muted); font-size: 8px; font-weight: 600; }
+.tk-shadow { fill: #07141b; opacity: .38; }
+.tk-vessel { stroke: #5d7887; stroke-width: 2.5; }
+.tk-vessel-line { fill: none; stroke: #7595a4; stroke-width: 2; opacity: .82; }
+.tk-cap { fill: none; stroke: #7696a5; stroke-width: 1.6; opacity: .85; }
+.tk-vessel-detail { fill: none; stroke: #6b8a99; stroke-width: 1.5; }
+.tk-sensor { fill: #182630; stroke: #9bc1cf; stroke-width: 1.5; }
 
 .tk-read {
   display: grid;
@@ -2893,17 +2918,14 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   line-height: 1.4;
 }
 
-.tk-wave-a {
-  animation: tkWave 6s linear infinite;
-}
-
-.tk-wave-b {
-  animation: tkWave 10s linear infinite reverse;
-}
-
-@keyframes tkWave {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-60px); }
+@media (max-width: 560px) {
+  .tk-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .tk-header { padding: 11px 12px; }
+  .tk-body { padding: 10px 10px 8px; }
+  .tk-read { gap: 6px; }
+  .tk-stat { padding: 6px 8px; }
+  .tk-stat-value { font-size: .86rem; }
+  .tk-conn { padding-left: 12px; padding-right: 12px; }
 }
 
 /* "Storage Tank asset" toggle inside the Configure & Add / Edit modals */
@@ -3728,11 +3750,8 @@ html[data-theme="dark"], body.dark-theme {
 
 .connection-card.is-online,
 .connection-card.is-offline {
-  background: var(--connection-card-bg) !important;
-  border-color: var(--connection-card-border) !important;
+  /* keep base card look; status color controlled by badge only */
 }
-.connection-card.is-online { --connection-card-bg: var(--connection-online-bg); --connection-card-border: var(--connection-online-border); }
-.connection-card.is-offline { --connection-card-bg: var(--connection-offline-bg); --connection-card-border: var(--connection-offline-border); }
 
 /* Keep card tint visible through structural insets while retaining chart color. */
 .connection-card > .meter-card-header,

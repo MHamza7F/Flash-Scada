@@ -41,10 +41,6 @@ else
                             <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
                         </svg>
                         <span>@tank.Name</span>
-                        @if (tank.IsSample)
-                        {
-                            <span style="font-size:0.62rem;font-weight:800;letter-spacing:0.6px;padding:0.12rem 0.4rem;border-radius:6px;background:var(--accent-amber-light);color:var(--accent-amber);border:1px solid var(--accent-amber);">SAMPLE</span>
-                        }
                     </div>
                     <span class="status-pill @(tank.IsOnline ? "online" : "offline")">
                         <span class="status-dot @(tank.IsOnline ? "online" : "offline")"></span>
@@ -54,43 +50,55 @@ else
 
                 <div class="tk-body">
                     <div class="tk-svg-wrap">
-                        <svg class="tk-svg" viewBox="0 0 220 264">
+                        <svg class="tk-svg" viewBox="0 0 220 280" role="img" aria-label="@tank.Name vertical cylindrical storage tank">
                             <defs>
-                                <linearGradient id="tkgrad-@(tank.Suffix)" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0" stop-color="#7dd3fc" />
-                                    <stop offset="1" stop-color="#0284c7" />
+                                <linearGradient id="tkwater-@(tank.Suffix)" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#70c7e5" stop-opacity="0.9" />
+                                    <stop offset="1" stop-color="#176488" stop-opacity="0.96" />
+                                </linearGradient>
+                                <linearGradient id="tkmetal-@(tank.Suffix)" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0" stop-color="#3d5362" />
+                                    <stop offset="0.24" stop-color="#263944" />
+                                    <stop offset="0.56" stop-color="#405766" />
+                                    <stop offset="1" stop-color="#1b2c38" />
+                                </linearGradient>
+                                <linearGradient id="tkshine-@(tank.Suffix)" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0" stop-color="#effaff" stop-opacity="0.14" />
+                                    <stop offset="0.3" stop-color="#effaff" stop-opacity="0.01" />
+                                    <stop offset="1" stop-color="#effaff" stop-opacity="0.05" />
                                 </linearGradient>
                                 <clipPath id="tkclip-@(tank.Suffix)">
-                                    <rect x="38" y="36" width="144" height="190" rx="12" />
+                                    <path d="M48 62 C48 45 172 45 172 62 L172 220 C172 237 48 237 48 220 Z" />
                                 </clipPath>
                             </defs>
 
-                            @* scale marks *@
+                            @* scale marks beside the industrial vessel *@
                             @for (var i = 0; i <= 4; i++)
                             {
-                                var my = 36 + (190 / 4f) * i;
-                                <line x1="38" y1="@my" x2="182" y2="@my" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4 5" />
+                                var my = 62 + (158 / 4f) * i;
+                                <line x1="24" y1="@my" x2="39" y2="@my" class="tk-scale-line" />
                             }
 
-                            @* tank shell *@
-                            <rect x="38" y="32" width="144" height="198" rx="12" fill="@(tank.IsOnline ? "#f8fafc" : "#f1f5f9")" stroke="#cbd5e1" stroke-width="3" />
+                            @* dark industrial vertical cylinder *@
+                            <ellipse cx="110" cy="250" rx="72" ry="7" class="tk-shadow" />
+                            <path d="M48 62 C48 45 172 45 172 62 L172 220 C172 237 48 237 48 220 Z" fill="url(#tkmetal-@(tank.Suffix))" class="tk-vessel" />
 
-                            @* liquid fill + wave *@
+                            @* liquid fill and a restrained surface highlight *@
                             <g clip-path="url(#tkclip-@(tank.Suffix))">
                                 @if (tank.Percent > 0)
                                 {
-                                    <rect x="38" y="@(LevelTop(tank.Percent))" width="144" height="@(226 - LevelTop(tank.Percent))" fill="url(#tkgrad-@(tank.Suffix))" opacity="0.85" />
+                                    <rect x="40" y="@(LevelTop(tank.Percent))" width="140" height="@(238 - LevelTop(tank.Percent))" fill="url(#tkwater-@(tank.Suffix))" />
                                     <g transform="translate(0, @(LevelTop(tank.Percent)))">
-                                        <g class="tk-wave">
-                                            <path class="tk-wave-a" d="M -80,0 Q -65,-13 -50,0 T -20,0 T 10,0 T 40,0 T 70,0 T 100,0 T 130,0 T 160,0 T 190,0 T 220,0 T 250,0 L 300,34 L -80,34 Z" fill="url(#tkgrad-@(tank.Suffix))" opacity="0.95" />
-                                            <path class="tk-wave-b" d="M -80,0 Q -70,-8 -60,0 T -40,0 T -20,0 T 0,0 T 20,0 T 40,0 T 60,0 T 80,0 T 100,0 T 120,0 T 140,0 T 160,0 T 180,0 T 200,0 T 220,0 T 240,0 T 260,0 T 280,0 T 300,0 L 300,8 L -80,8 Z" fill="#bae6fd" opacity="0.55" />
-                                        </g>
+                                        <path d="M30 0 Q50 -5 70 0 T110 0 T150 0 T190 0 T230 0 V12 H30 Z" fill="#b9e9f5" opacity="0.32" />
                                     </g>
                                 }
+                                <path d="M48 62 C48 45 172 45 172 62 L172 220 C172 237 48 237 48 220 Z" fill="url(#tkshine-@(tank.Suffix))" />
                             </g>
 
-                            @* glass shine *@
-                            <line x1="50" y1="40" x2="50" y2="222" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.55" />
+                            <path d="M48 62 C48 45 172 45 172 62 L172 220 C172 237 48 237 48 220 Z" class="tk-vessel-line" />
+                            <ellipse cx="110" cy="62" rx="62" ry="17" class="tk-cap" />
+                            <path d="M78 237v15m64-15v15M70 252h24m52 0h24M94 45V28h32v17" class="tk-vessel-detail" />
+                            <circle cx="110" cy="35" r="4" class="tk-sensor" />
                         </svg>
 
                         @if (tank.Percent >= 100)
@@ -143,7 +151,7 @@ else
     {
         public Guid SensorId;
         public string Name = "";
-        public bool IsSample;
+        public bool IsSample { get; set; }
         public string UniqueSensorId = "";
         public string DeviceName = "";
         public string DriverKey = "";
@@ -174,8 +182,8 @@ else
 
     private static float LevelTop(double percent)
     {
-        const float innerTop = 36;
-        const float innerH = 190;
+        const float innerTop = 62;
+        const float innerH = 158;
         return innerTop + innerH - (float)percent / 100f * innerH;
     }
 
@@ -202,31 +210,6 @@ else
     private string? LoadError;
     private bool _disposed;
     private System.Threading.Timer? _refreshTimer;
-
-    // ---- Sample tank (front-end design preview only) -------------------------
-    // Set ShowSampleTank = false (or delete this const, BuildSampleTank() and the
-    // single call site in RefreshAsync) to remove the demo card entirely.
-    private const bool ShowSampleTank = true;
-    private static readonly Guid SampleTankId = new("11111111-1111-1111-1111-111111111111");
-
-    private static TankView BuildSampleTank() => new()
-    {
-        SensorId = SampleTankId,
-        Name = "Sample Storage Tank",
-        IsSample = true,
-        UniqueSensorId = "DEMO-S01",
-        DeviceName = "Demo Device",
-        DriverKey = "KAIFENG_EM_FLOWMETER",
-        SlaveAddress = 1,
-        Capacity = 1000,
-        LiquidType = "Water",
-        IsOnline = true,
-        Totalizer = 632,
-        TotalizerUnit = "m³",
-        Flow = 12.4,
-        FlowUnit = "m³/h",
-        LastSeen = DateTime.UtcNow
-    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -326,9 +309,6 @@ else
                 .OrderBy(t => t.DeviceName)
                 .ThenBy(t => t.Name)
                 .ToList();
-
-            if (ShowSampleTank)
-                TankList.Insert(0, BuildSampleTank());
 
             SyncLiveValues();
         }

@@ -32,16 +32,16 @@
 @if (!string.IsNullOrEmpty(ToastMessage))
 {
     <div class="scada-toast @(ToastIsError ? "error" : "success")">
-        <span>@(ToastIsError ? "✕" : "✓")</span>
+        <span>@(ToastIsError ? "Error:" : "Success:")</span>
         <span>@ToastMessage</span>
-        <button class="toast-close" @onclick="() => ToastMessage = null">✕</button>
+        <button class="toast-close" aria-label="Close notification" @onclick="() => ToastMessage = null">Close</button>
     </div>
 }
 
 @if (GatewayDevices.Count == 0 && !Loading)
 {
     <div class="glass-card" style="text-align:center;padding:3rem;">
-        <div style="font-size:2rem;margin-bottom:0.5rem;">⚙️</div>
+        <div style="font-size:2rem;margin-bottom:0.5rem;">Norvi</div>
         <h3 style="color:var(--text-primary);margin-bottom:0.5rem;">No Norvi Devices Configured</h3>
         <p style="color:var(--text-muted);">Register your Norvi ESP32 device using the <strong>+ Add Norvi Device</strong> button above.</p>
     </div>
@@ -49,7 +49,7 @@
 
 @if (Loading)
 {
-    <div class="glass-card" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading Norvi devices…</div>
+    <div class="glass-card" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading Norvi devices...</div>
 }
 else
 {
@@ -100,19 +100,19 @@ else
                         <div style="font-weight:700;color:var(--text-primary);">@(sensorCount) / @(capacity) Sensors</div>
                     </div>
                     <span style="font-size:0.75rem;font-weight:700;padding:0.3rem 0.75rem;border-radius:12px;background:@(d.IsOnline ? "rgba(16,185,129,0.15)" : "rgba(148,163,184,0.15)");color:@(d.IsOnline ? "var(--accent-emerald)" : "var(--text-muted)");">
-                        @(d.IsOnline ? "● ONLINE" : "○ OFFLINE")
+                        @(d.IsOnline ? "ONLINE" : "OFFLINE")
                     </span>
                     <button class="btn-small" style="background:var(--accent-rose-light);color:var(--accent-rose);border:1px solid var(--accent-rose);border-radius:6px;padding:0.3rem 0.65rem;font-size:0.75rem;font-weight:600;"
                             @onclick="() => PromptDeleteDevice(d)" @onclick:stopPropagation>
                         Delete Device
                     </button>
-                    <span style="color:var(--text-muted);font-size:0.85rem;transition:transform .2s;transform:rotate(@(expanded ? "90" : "0")deg);">▶</span>
+                    <span aria-hidden="true" style="color:var(--text-muted);font-size:0.85rem;transition:transform .2s;transform:rotate(@(expanded ? "90" : "0")deg);">&gt;</span>
                 </div>
             </div>
 
             <div style="display:flex;align-items:center;gap:1rem;margin-top:0.6rem;padding:0.45rem 0.7rem;background:var(--bg-surface);border-radius:6px;border:1px solid var(--border);font-size:0.78rem;flex-wrap:wrap;">
                 <span style="font-weight:700;color:@(d.IsOnline ? "var(--accent-emerald)" : "var(--accent-rose)");">
-                    @(d.IsOnline ? "● DEVICE ONLINE" : "○ DEVICE OFFLINE")
+                    @(d.IsOnline ? "DEVICE ONLINE" : "DEVICE OFFLINE")
                 </span>
                 <span style="color:var(--border)">|</span>
                 <span style="color:var(--text-muted);">Sensors: <strong style="color:var(--text-primary);">@d.SensorCount</strong>/@(capacity)</span>
@@ -171,7 +171,7 @@ else
                                     </span>
                                     <button class="btn-small" style="border:1px solid var(--border);padding:0.25rem 0.6rem;border-radius:6px;background:var(--bg-surface);color:var(--primary-blue);font-size:0.75rem;font-weight:600;"
                                             @onclick="() => OpenEditSensor(s)" @onclick:stopPropagation>
-                                        ⚙ Edit Parameters
+                                        Edit Parameters
                                     </button>
                                     <button class="btn-small" style="border:1px solid var(--border);padding:0.25rem 0.6rem;border-radius:6px;background:var(--bg-surface);color:var(--accent-rose);font-size:0.75rem;font-weight:600;"
                                             @onclick="() => PromptDeleteSensor(s)" @onclick:stopPropagation>
@@ -184,7 +184,7 @@ else
                 }
                 else
                 {
-                    <div style="padding:0.5rem;color:var(--text-muted);font-size:0.85rem;">Loading attached sensors…</div>
+                    <div style="padding:0.5rem;color:var(--text-muted);font-size:0.85rem;">Loading attached sensors...</div>
                 }
 
                 <div style="margin-top:0.6rem;">
@@ -210,7 +210,7 @@ else
         <div class="modal-card glass-card" style="min-width:480px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3>Add Norvi Device</h3>
-                <button class="modal-close" @onclick="() => ShowDeviceModal = false">✕</button>
+                <button class="modal-close" aria-label="Close" @onclick="() => ShowDeviceModal = false">Close</button>
             </div>
             <div class="modal-body">
                 <div class="form-grid-2">
@@ -256,15 +256,15 @@ else
                 </div>
                 @if (DeviceFormSuccess != null)
                 {
-                    <div class="modal-alert success">✓ @DeviceFormSuccess</div>
+                    <div class="modal-alert success">Success: @DeviceFormSuccess</div>
                 }
                 @if (DeviceFormError != null)
                 {
-                    <div class="modal-alert error">✕ @DeviceFormError</div>
+                    <div class="modal-alert error">Error: @DeviceFormError</div>
                 }
                 @if (DeviceIpMessage != null)
                 {
-                    <div class="modal-alert warning">⚠️ @DeviceIpMessage</div>
+                    <div class="modal-alert warning">Warning: @DeviceIpMessage</div>
                 }
             </div>
             <div class="modal-footer">
@@ -285,21 +285,21 @@ else
         <div class="modal-card glass-card" style="min-width:480px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3>Add Field Sensor</h3>
-                <button class="modal-close" @onclick="() => ShowSensorModal = false">✕</button>
+                <button class="modal-close" aria-label="Close" @onclick="() => ShowSensorModal = false">Close</button>
             </div>
             <div class="modal-body">
                 <div class="form-grid-2">
                     <div class="form-group" style="grid-column:1 / -1;">
                         <label>Target Gateway</label>
                         <div class="custom-input" style="cursor:default;color:var(--text-primary);background:var(--bg-muted,#f1f5f9);">
-                            @(SelectedDevice != null ? $"{SelectedDevice.Name} ({SelectedDevice.ExternalId} - {SelectedDevice.IpAddress})" : "—")
+                            @(SelectedDevice != null ? $"{SelectedDevice.Name} ({SelectedDevice.ExternalId} - {SelectedDevice.IpAddress})" : "Not selected")
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Sensor Type (Driver Library) *</label>
                         <select class="custom-select" @bind="SensorTypeKey" @bind:after="OnSensorLibraryChanged" disabled="@(SensorSubmitBusy || SelectedDevice == null)">
-                            <option value="">Select Driver Library …</option>
+                            <option value="">Select Driver Library...</option>
                             @foreach (var lib in SensorLibraries)
                             {
                                 <option value="@lib.DriverKey">@lib.DisplayName</option>
@@ -330,14 +330,14 @@ else
                             <div class="tank-toggle-box" style="grid-column:1 / -1;">
                                 <div>
                                     <div class="tank-toggle-title">Storage Tank asset</div>
-                                    <div class="tank-toggle-hint">Level = Totalizer ÷ capacity — shows on the Storage Tanks page</div>
+                                    <div class="tank-toggle-hint">Level = totalizer / capacity. See the Storage Tanks page.</div>
                                 </div>
                                 <input type="checkbox" @bind="SensorIsTank" class="tank-checkbox" />
                             </div>
                             @if (SensorIsTank)
                             {
                                 <div class="form-group">
-                                    <label>Capacity (m³)</label>
+                                    <label>Capacity (m3)</label>
                                     <input type="number" step="0.1" min="0" class="custom-input" @bind="SensorTankCapacity" />
                                 </div>
                                 <div class="form-group">
@@ -350,19 +350,19 @@ else
                 </div>
                 @if (SensorFormSuccess != null)
                 {
-                    <div class="modal-alert success">✓ @SensorFormSuccess</div>
+                    <div class="modal-alert success">Success: @SensorFormSuccess</div>
                 }
                 @if (SensorCapacityError != null)
                 {
-                    <div class="modal-alert warning">⚠️ @SensorCapacityError</div>
+                    <div class="modal-alert warning">Warning: @SensorCapacityError</div>
                 }
                 @if (SensorFormError != null)
                 {
-                    <div class="modal-alert error">✕ @SensorFormError</div>
+                    <div class="modal-alert error">Error: @SensorFormError</div>
                 }
                 @if (SensorSlaveCheckMessage != null)
                 {
-                    <div class="modal-alert warning">⚠️ @SensorSlaveCheckMessage</div>
+                    <div class="modal-alert warning">Warning: @SensorSlaveCheckMessage</div>
                 }
             </div>
             <div class="modal-footer">
@@ -383,7 +383,7 @@ else
         <div class="modal-card glass-card" style="min-width:480px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3>Edit Sensor Parameters</h3>
-                <button class="modal-close" @onclick="() => EditingSensor = null">✕</button>
+                <button class="modal-close" aria-label="Close" @onclick="() => EditingSensor = null">Close</button>
             </div>
             <div class="modal-body">
                 <div style="padding:0.5rem 0.6rem;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);margin-bottom:0.9rem;">
@@ -437,7 +437,7 @@ else
                     </div>
                     @if (EditingSensor.SelectedParams.Count == 0)
                     {
-                        <div class="modal-alert warning" style="margin-top:0.5rem;">⚠️ Select at least one parameter for this sensor.</div>
+                        <div class="modal-alert warning" style="margin-top:0.5rem;">Warning: Select at least one parameter for this sensor.</div>
                     }
                 </div>
 
@@ -446,7 +446,7 @@ else
                     <div class="tank-toggle-box" style="margin-top:0.6rem;">
                         <div>
                             <div class="tank-toggle-title">Storage Tank asset</div>
-                            <div class="tank-toggle-hint">Level = Totalizer ÷ capacity — shows on the Storage Tanks page</div>
+                            <div class="tank-toggle-hint">Level = totalizer / capacity. See the Storage Tanks page.</div>
                         </div>
                         <input type="checkbox" @bind="EditingSensor.IsTank" class="tank-checkbox" />
                     </div>
@@ -454,7 +454,7 @@ else
                     {
                         <div class="form-grid-2" style="margin-top:0.5rem;">
                             <div class="form-group">
-                                <label>Capacity (m³)</label>
+                                <label>Capacity (m3)</label>
                                 <input type="number" step="0.1" min="0" class="custom-input" @bind="EditingSensor.TankCapacity" />
                             </div>
                             <div class="form-group">
@@ -467,7 +467,7 @@ else
 
                 @if (EditFormError != null)
                 {
-                    <div class="modal-alert error">✕ @EditFormError</div>
+                    <div class="modal-alert error">Error: @EditFormError</div>
                 }
             </div>
             <div class="modal-footer">
@@ -488,7 +488,7 @@ else
         <div class="modal-card glass-card" style="min-width:440px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3 style="color:var(--accent-rose);">Delete Gateway Device</h3>
-                <button class="modal-close" @onclick="() => DeviceToDelete = null">✕</button>
+                <button class="modal-close" aria-label="Close" @onclick="() => DeviceToDelete = null">Close</button>
             </div>
             <div class="modal-body">
                 <p style="color:var(--text-primary);margin-bottom:0.75rem;">
@@ -501,7 +501,7 @@ else
             <div class="modal-footer">
                 <button class="btn-secondary-scada" @onclick="() => DeviceToDelete = null" disabled="@DeleteBusy">Cancel</button>
                             <button class="btn-primary-scada" style="background:var(--accent-rose);border-color:var(--accent-rose);" @onclick="ConfirmDeleteDeviceAsync" disabled="@DeleteBusy">
-                    @(DeleteBusy ? "Deleting…" : "Confirm Delete Gateway")
+                    @(DeleteBusy ? "Deleting..." : "Confirm Delete Gateway")
                 </button>
             </div>
         </div>
@@ -515,7 +515,7 @@ else
         <div class="modal-card glass-card" style="min-width:440px;" @onclick:stopPropagation>
             <div class="modal-header">
                 <h3 style="color:var(--accent-rose);">Delete Field Sensor</h3>
-                <button class="modal-close" @onclick="() => SensorToDelete = null">✕</button>
+                <button class="modal-close" aria-label="Close" @onclick="() => SensorToDelete = null">Close</button>
             </div>
             <div class="modal-body">
                 <p style="color:var(--text-primary);margin-bottom:0.75rem;">
@@ -528,7 +528,7 @@ else
             <div class="modal-footer">
                 <button class="btn-secondary-scada" @onclick="() => SensorToDelete = null" disabled="@DeleteBusy">Cancel</button>
                             <button class="btn-primary-scada" style="background:var(--accent-rose);border-color:var(--accent-rose);" @onclick="ConfirmDeleteSensorAsync" disabled="@DeleteBusy">
-                    @(DeleteBusy ? "Deleting…" : "Confirm Delete Sensor")
+                    @(DeleteBusy ? "Deleting..." : "Confirm Delete Sensor")
                 </button>
             </div>
         </div>
@@ -610,24 +610,24 @@ else
         {
             ["AOSONG_AQ3485"] = new()
             {
-                new("TemperatureC", "Temperature", "°C"),
+                new("TemperatureC", "Temperature", "C"),
                 new("HumidityRH", "Humidity", "%RH"),
             },
             ["KAIFENG_FLOWMETER"] = new()
             {
-                new("InstantaneousFlowRate", "Flow Rate", "Nm³/h"),
-                new("AccumulatedTotalizer", "Totalizer", "Nm³"),
+                new("InstantaneousFlowRate", "Flow Rate", "Nm3/h"),
+                new("AccumulatedTotalizer", "Totalizer", "Nm3"),
                 new("Velocity", "Velocity (metadata only)", "m/s"),
             },
             ["KAIFENG_EM_FLOWMETER"] = new()
             {
-                new("InstantaneousFlowRate", "Flow Rate", "m³/h"),
-                new("AccumulatedTotalizer", "Totalizer", "m³"),
+                new("InstantaneousFlowRate", "Flow Rate", "m3/h"),
+                new("AccumulatedTotalizer", "Totalizer", "m3"),
             },
             ["VORTEX_FLOWMETER"] = new()
             {
-                new("InstantaneousFlowRate", "Flow Rate", "m³/h"),
-                new("AccumulatedTotalizer", "Totalizer", "m³"),
+                new("InstantaneousFlowRate", "Flow Rate", "m3/h"),
+                new("AccumulatedTotalizer", "Totalizer", "m3"),
             },
             ["SELEC_POWER_METER"] = new()
             {

@@ -81,6 +81,17 @@ public static class CheckpostRouter
                 DefaultRegisterQuantity: 2,
                 UnitPrimary: "m³/h",
                 UnitSecondary: "m³",
+                DefaultPollIntervalSeconds: 3),
+            [DeviceProfileType.KaifengFlowmeter] = new(
+                DeviceProfileType.KaifengFlowmeter,
+                DriverKey: "KAIFENG_FLOWMETER",
+                SimpleName: "kaifeng",
+                ModelName: "Kaifeng Flowmeter",
+                DefaultFunctionCode: 0x03,
+                DefaultStartRegister: 0,
+                DefaultRegisterQuantity: 4,
+                UnitPrimary: "Nm³/h",
+                UnitSecondary: "Nm³",
                 DefaultPollIntervalSeconds: 3)
         }.ToFrozenDictionary();
 

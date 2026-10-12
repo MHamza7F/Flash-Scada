@@ -15,7 +15,8 @@ public enum DeviceProfileType : byte
     AosongAQ3485 = 1,
     V880BRVortex = 2,
     SelecPower = 4,
-    Electromagnetic = 5
+    Electromagnetic = 5,
+    KaifengFlowmeter = 6
 }
 
 /// <summary>
