@@ -12,7 +12,7 @@
 
 @if (LoadError is not null)
 {
-    <div class="report-error-box"><span>⚠️ @LoadError</span><button class="btn-sm-action-ack" @onclick="RefreshAsync">Retry</button></div>
+    <div class="report-error-box"><span>⚠️ @LoadError</span><button type="button" class="btn-sm-action-ack" @onclick="RefreshAsync">Retry</button></div>
 }
 
 @if (TankList.Count == 0 && !Loading)

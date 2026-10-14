@@ -6,15 +6,34 @@
 @attribute [Authorize(Policy = $"Action:{AppPermissions.DevicesView}")]
 @inject ScadaDemoTestApiClient Api
 @inject LiveTelemetryState Live
-@inject NavigationManager Navigation
 @implements IDisposable
 
-<PageTitle>View Gateway and Sensors</PageTitle>
+<PageTitle>View Instruments</PageTitle>
 
 <div class="infrastructure-page">
     <header class="infra-heading">
-        <div><div class="infra-eyebrow">Connectivity &amp; instrumentation</div><h1>View Gateway and Sensors</h1><p>Your connected infrastructure. One clear view.</p></div>
-        <AuthorizeView Policy="Action:Devices.Add"><Authorized><button class="btn-primary-scada" @onclick="GoToGateway">＋ Add device</button></Authorized></AuthorizeView>
+        <div><div class="infra-eyebrow">Connectivity &amp; instrumentation</div><h1>View Instruments</h1><p>Your connected infrastructure. One clear view.</p></div>
+        <AuthorizeView Policy="Action:Devices.Add">
+            <Authorized>
+                <details class="infra-add-menu">
+                    <summary class="btn-primary-scada">
+                        <span aria-hidden="true">＋</span>
+                        <span>Add device</span>
+                        <span class="infra-add-chevron" aria-hidden="true">▾</span>
+                    </summary>
+                    <div class="infra-add-options" role="group" aria-label="Choose a device type">
+                        <a class="infra-add-option" href="/gateway">
+                            <strong>Add Gateway</strong>
+                            <span>Configure a gateway and scan its sensors.</span>
+                        </a>
+                        <a class="infra-add-option" href="/devices">
+                            <strong>Add NORVI</strong>
+                            <span>Register a NORVI controller.</span>
+                        </a>
+                    </div>
+                </details>
+            </Authorized>
+        </AuthorizeView>
     </header>
 
     <section class="infra-metrics" aria-label="Infrastructure summary">
@@ -211,7 +230,6 @@
     private static List<ScadaDemoTestApiClient.SensorReadingDto> NormalizeHistory(IEnumerable<ScadaDemoTestApiClient.SensorReadingDto> history) => history.Where(r => r.TimestampUtc != default && double.IsFinite(r.PrimaryValue) && double.IsFinite(r.SecondaryValue)).GroupBy(r => r.TimestampUtc).Select(g => g.OrderByDescending(r => r.ConnectionStatus).ThenByDescending(r => r.PrimaryValue).ThenByDescending(r => r.SecondaryValue).ThenBy(r => r.ErrorCode ?? string.Empty).First()).OrderBy(r => r.TimestampUtc).TakeLast(DetailHistoryLimit).ToList();
     private void HandleModalKey(KeyboardEventArgs e) { if (e.Key == "Escape") CloseSensor(); }
     protected override async Task OnAfterRenderAsync(bool firstRender) { if (_focusModalOnRender) { _focusModalOnRender = false; try { await _modalCloseButton.FocusAsync(); } catch (InvalidOperationException) { } } else if (_focusReturnOnRender) { _focusReturnOnRender = false; if (_focusReturnSensorId is Guid sensorId && _sensorButtonRefs.TryGetValue(sensorId, out var sensorButton)) { try { await sensorButton.FocusAsync(); } catch (InvalidOperationException) { } } } }
-    private void GoToGateway() => Navigation.NavigateTo("/gateway");
     private static bool IsNorvi(ScadaDemoTestApiClient.GatewayDeviceDto d) => d.HardwareType.Contains("norvi", StringComparison.OrdinalIgnoreCase) || d.ProvisionedVia.Contains("norvi", StringComparison.OrdinalIgnoreCase);
     private static string DeviceType(ScadaDemoTestApiClient.GatewayDeviceDto d) => IsNorvi(d) ? "NORVI controller" : "Gateway";
     private static string DriverName(ScadaDemoTestApiClient.AttachedSensorDto s) => (s.DriverDisplayName ?? s.SensorTypeKey).Split('(')[0].Trim();

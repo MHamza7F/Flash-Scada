@@ -9,7 +9,7 @@
         <p class="page-subtitle">Complete chronological activity log: who changed what, when, from which IP</p>
     </div>
     <div class="header-actions">
-        <button class="btn-sm-report" @onclick="LoadLogsAsync" disabled="@IsLoading">🔄 @(IsLoading ? "Loading..." : "Refresh Log")</button>
+        <button type="button" class="btn-sm-report" @onclick="LoadLogsAsync" disabled="@IsLoading">🔄 @(IsLoading ? "Loading..." : "Refresh Log")</button>
     </div>
 </div>
 
@@ -27,7 +27,7 @@
     {
         <div class="scada-toast error" role="alert" style="margin:12px 18px;">
             <span>@LoadError</span>
-            <button class="btn-sm-action-ack" @onclick="LoadLogsAsync">Retry</button>
+            <button type="button" class="btn-sm-action-ack" @onclick="LoadLogsAsync">Retry</button>
         </div>
     }
 

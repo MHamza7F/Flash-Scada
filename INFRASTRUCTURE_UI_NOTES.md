@@ -1,12 +1,12 @@
 # Real infrastructure tab and industrial theme
 
 ## Result
-- New `/infrastructure` route, available as standalone **View Gateway and Sensors** next to Live Monitoring, not hidden in a collapsed group.
+- New `/infrastructure` route, available as standalone **View Instruments** next to Live Monitoring, not hidden in a collapsed group.
 - Uses existing local API inventory and the shared SignalR telemetry stream. No demo records, random readings, simulated clocks or fabricated trends.
 - Device inventory refreshes every five seconds. Real registered NORVI/gateway records and active sensors are shown; deleted selections are cleared on refresh.
 - Device/sensor searches, type/status/category filters, grouped cards, sticky back navigation and sensor detail/history are included.
 - Sensor cards require connected telemetry, API online status, actual fresh samples and configured metric keys. Stale/disconnected samples do not appear as live values. Freshness currently uses the shared 60-second window.
-- Add device uses the existing gateway configuration flow; the action requires Devices.Add. The page requires Devices tab and Devices.View permissions.
+- Add device opens a type chooser for the existing gateway configuration flow or NORVI management flow; the action requires Devices.Add. The page requires Devices tab and Devices.View permissions.
 - Hardware photos copied from the supplied design reference. Reference simulation JavaScript was not copied.
 - Site-wide navy/teal theme adapts shared cards, controls, tables, navigation and modals for light/dark mode. Saved user choice wins over OS preference; otherwise the theme follows the OS.
 - Shared live telemetry now exposes detached snapshots and uses actual source timestamps, rejecting non-finite, out-of-order and far-future readings.

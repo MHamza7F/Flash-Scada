@@ -157,7 +157,7 @@ app.MapPost("/account/login", async (HttpContext http, IAntiforgery antiforgery,
 {
     // Validate before credentials, session creation, or any API request.
     if (!await antiforgery.IsRequestValidAsync(http))
-        return Results.BadRequest("Invalid account form. Reload the page and try again.");
+        return Results.Redirect("/login?error=" + Uri.EscapeDataString("Your session expired. Please sign in again."));
 
     var form = await http.Request.ReadFormAsync(http.RequestAborted);
     var email = form["email"].ToString();
@@ -202,7 +202,7 @@ app.MapPost("/account/login", async (HttpContext http, IAntiforgery antiforgery,
 app.MapPost("/account/logout", async (HttpContext http, IAntiforgery antiforgery, ScadaDemoTestApiClient api, WebAuthSessionStore sessions) =>
 {
     if (!await antiforgery.IsRequestValidAsync(http))
-        return Results.BadRequest("Invalid account form. Reload the page and try again.");
+        return Results.Redirect("/login?error=" + Uri.EscapeDataString("Your session expired. Please sign in again."));
 
     var session = sessions.Find(http.User);
     if (session != null)

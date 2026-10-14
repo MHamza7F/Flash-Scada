@@ -7,10 +7,12 @@
 
 <aside id="primary-sidebar" aria-label="Main navigation" class="sidebar @(IsCollapsed ? "collapsed" : "") @(IsMobileOpen ? "mobile-open" : "")">
     <div class="sidebar-brand">
-        <img class="brand-logo" src="/images/logo.jpg" alt="ALAM IOT logo" />
+        <span class="brand-logo-frame">
+            <img class="brand-logo" src="/images/logo.jpg" alt="ALAM globe logo" />
+        </span>
         <div class="brand-text">
             <div class="brand-title">ALAM IOT</div>
-            <div class="brand-sub">SCADA ENTERPRISE</div>
+            <div class="brand-sub">ENTERPRISE</div>
         </div>
         <button type="button" class="icon-btn sidebar-mobile-close" aria-label="Close navigation" @onclick="OnBackdropClick">&times;</button>
     </div>
@@ -93,7 +95,7 @@
     {
         new NavItem("/dashboard", "Dashboard", "EnergyIcon", Microsoft.AspNetCore.Components.Routing.NavLinkMatch.Prefix, AppTabs.Energy),
         new NavItem("/", "Live Monitoring", "MonitoringIcon", Microsoft.AspNetCore.Components.Routing.NavLinkMatch.All, AppTabs.Monitoring),
-        new NavItem("/infrastructure", "View Gateway and Sensors", "GatewayIcon", Microsoft.AspNetCore.Components.Routing.NavLinkMatch.Prefix, AppTabs.Devices),
+        new NavItem("/infrastructure", "View Instruments", "GatewayIcon", Microsoft.AspNetCore.Components.Routing.NavLinkMatch.Prefix, AppTabs.Devices),
         new NavItem("/summary", "Totalizer Summary", "SummaryIcon", Microsoft.AspNetCore.Components.Routing.NavLinkMatch.Prefix, AppTabs.Summary),
         new NavGroup("TREND", "TrendsIcon", AppTabs.Charts, new()
         {

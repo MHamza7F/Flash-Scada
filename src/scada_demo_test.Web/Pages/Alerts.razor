@@ -28,7 +28,7 @@
 
 @if (LoadError is not null)
 {
-    <div class="report-error-box"><span>⚠️ @LoadError</span><button class="btn-sm-action-ack" @onclick="LoadDataAsync">Retry</button></div>
+    <div class="report-error-box"><span>⚠️ @LoadError</span><button type="button" class="btn-sm-action-ack" @onclick="LoadDataAsync">Retry</button></div>
 }
 
 <!-- Summary Alarms Stats -->
@@ -55,7 +55,7 @@
 <div class="glass-card table-card">
     <div class="table-card-header">
         <h3>🚨 Alarm Incident Feed</h3>
-        <button class="btn-sm-report" @onclick="LoadDataAsync">🔄 Refresh Alarms</button>
+        <button type="button" class="btn-sm-report" @onclick="LoadDataAsync">🔄 Refresh Alarms</button>
     </div>
 
     <div class="table-responsive">

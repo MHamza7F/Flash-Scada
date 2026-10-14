@@ -215,3 +215,69 @@ body.dark-theme .infrastructure-page .infra-toolbar select { color-scheme: dark;
 @media(max-width:650px) {
     .infrastructure-page .sensor-grid { grid-template-columns: 1fr; }
 }
+
+.infra-add-menu {
+    position: relative;
+    z-index: 4;
+}
+.infra-add-menu > summary {
+    list-style: none;
+    cursor: pointer;
+}
+.infra-add-menu > summary::-webkit-details-marker {
+    display: none;
+}
+.infra-add-menu > summary:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 3px;
+}
+.infra-add-chevron {
+    display: inline-block;
+    transition: transform .18s ease;
+}
+.infra-add-menu[open] .infra-add-chevron {
+    transform: rotate(180deg);
+}
+.infra-add-options {
+    position: absolute;
+    top: calc(100% + .45rem);
+    right: 0;
+    z-index: 5;
+    display: grid;
+    gap: .25rem;
+    min-width: 250px;
+    padding: .45rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-card);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .22);
+}
+.infra-add-option {
+    display: grid;
+    gap: .2rem;
+    padding: .7rem .8rem;
+    border-radius: 7px;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+.infra-add-option:hover {
+    background: var(--bg-surface);
+}
+.infra-add-option:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+.infra-add-option strong {
+    font-size: .85rem;
+}
+.infra-add-option span {
+    color: var(--text-muted);
+    font-size: .72rem;
+}
+.infrastructure-page .status-badge {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+@media(max-width:850px) {
+    .infra-add-menu { align-self: flex-start; }
+}

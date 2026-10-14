@@ -5,7 +5,7 @@
 
 :root {
   --sidebar-w: 248px;
-  --sidebar-w-collapsed: 72px;
+  --sidebar-w-collapsed: 80px;
   --topbar-h: 64px;
   --footer-h: 42px;
 
@@ -201,19 +201,69 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   align-items: center;
   padding: 0 16px;
   gap: 12px;
+  justify-content: center;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-surface);
 }
 
 .brand-mark, .sidebar-brand .brand-logo {
-  width: 48px;
+  width: 64px;
   height: 48px;
-  border-radius: 10px;
   object-fit: contain;
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-xs);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  mix-blend-mode: multiply;
   flex-shrink: 0;
+}
+
+.sidebar-brand .brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+}
+
+.sidebar-brand .brand-logo-frame {
+  width: 74px;
+  height: 52px;
+  flex: 0 0 74px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.sidebar-brand .brand-text {
+  margin-left: 0;
+}
+
+.login-brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: block;
+  mix-blend-mode: multiply;
+}
+
+.login-brand-frame {
+  width: 112px;
+  height: 80px;
+  flex: 0 0 112px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+html[data-theme="dark"] .brand-logo,
+body.dark-theme .brand-logo,
+html[data-theme="dark"] .login-brand-logo,
+body.dark-theme .login-brand-logo {
+  filter: invert(1);
+  mix-blend-mode: screen;
 }
 
 .brand-text {
@@ -707,6 +757,41 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .status-pill.offline {
   background: var(--accent-rose-light);
   color: var(--accent-rose);
+}
+
+.gw-device-card .status-pill {
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: max-content;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.gw-device-card .status-pill-label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.gw-device-card .sensor-row-layout {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.gw-device-card .sensor-row-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 850px) {
+  .gw-device-card .sensor-row-actions {
+    flex: 1 1 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 }
 
 .meter-grid {
@@ -2184,7 +2269,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  padding: 36px 32px;
+  padding: 40px 32px;
   z-index: 10;
 }
 
@@ -2194,21 +2279,38 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   align-items: center;
   text-align: center;
   margin-bottom: 28px;
+  transform: translateX(-6px);
 }
 
-.login-brand-logo {
-  width: auto;
-  max-width: 220px;
-  height: auto;
-  max-height: 80px;
-  object-fit: contain;
-  background: var(--bg-surface);
-  padding: 6px 14px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  display: block;
+.login-brand-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.login-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.login-brand-title {
+  color: var(--text-main);
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.login-brand-sub {
+  color: var(--text-main);
+  width: max-content;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
 }
 
 .login-brand h2 {
@@ -2219,7 +2321,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 }
 
 .login-brand p {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--primary-blue);
   letter-spacing: 0.9px;
@@ -2286,6 +2388,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 /* Keep every icon on the same centerline, including nested routes and branding. */
 @media (min-width: 769px) {
   .sidebar.collapsed .sidebar-brand { padding: 0; justify-content: center; gap: 0; }
+  .sidebar.collapsed .sidebar-brand .brand-logo-frame { width: 72px; flex-basis: 72px; }
   .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; gap: 0; }
   .sidebar.collapsed .nav-caret { display: none; }
   .sidebar.collapsed .nav-group-children { margin-left: 0; padding-left: 0; border-left: 0; }
@@ -3570,7 +3673,8 @@ body { overflow-wrap: anywhere; }
 .sidebar .nav-item.active { box-shadow: inset 3px 0 var(--primary-blue); }
 .brand-title, .user-name, .page-title, .meter-name, .table-card-header h3,
 .table-card-header h4, .card-header-icon h3, .modal-header h3 { color: var(--text-main); }
-.brand-sub, .view-all-link, .user-role-badge, .view-telemetry-btn { color: var(--primary-blue); }
+.view-all-link, .user-role-badge, .view-telemetry-btn { color: var(--primary-blue); }
+.brand-sub { color: var(--text-main); }
 
 /* Cards stay neutral; connectivity is communicated by its badge/dot only. */
 .glass-card, .meter-card, .device-card, .stat-card, .overview-stat, .site-card,

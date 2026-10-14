@@ -23,7 +23,8 @@ public class AccountFormSecurityTests
         var endpoint = program[start..end];
         var validation = endpoint.IndexOf("antiforgery.IsRequestValidAsync(http)", StringComparison.Ordinal);
         Assert.True(validation >= 0);
-        Assert.Contains("return Results.BadRequest", endpoint);
+        Assert.True(endpoint.Contains("return Results.BadRequest", StringComparison.Ordinal) ||
+            endpoint.Contains("return Results.Redirect", StringComparison.Ordinal));
         Assert.True(validation < endpoint.IndexOf(action == "login" ? "api.LoginAsync" : "sessions.Find", StringComparison.Ordinal));
         Assert.DoesNotContain("DisableAntiforgery", program);
         Assert.DoesNotContain("app.MapGet(\"/account/logout\"", program);

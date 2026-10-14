@@ -77,9 +77,15 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        _sidebarModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sidebar.js");
-        _self = DotNetObjectReference.Create(this);
-        await _sidebarModule.InvokeVoidAsync("initialize", _shell, _self);
+        try
+        {
+            _sidebarModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sidebar.js");
+            _self = DotNetObjectReference.Create(this);
+            await _sidebarModule.InvokeVoidAsync("initialize", _shell, _self);
+        }
+        catch (JSDisconnectedException) { }
+        catch (OperationCanceledException) { }
+        catch (InvalidOperationException) { }
     }
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs args)
@@ -133,6 +139,8 @@
                 await _sidebarModule.DisposeAsync();
             }
             catch (JSDisconnectedException) { }
+            catch (OperationCanceledException) { }
+            catch (InvalidOperationException) { }
         }
         _self?.Dispose();
     }

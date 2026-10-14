@@ -91,6 +91,7 @@ public class LiveTelemetryState : IAsyncDisposable
     private HubConnection? _hubConnection;
     private Task? _startTask;
     private int _connectLoopRunning;
+    private volatile bool _disposed;
 
     public LiveTelemetryState(IConfiguration config, ITelemetryBroadcastBus bus, ILogger<LiveTelemetryState> logger)
     {
@@ -237,6 +238,7 @@ public class LiveTelemetryState : IAsyncDisposable
 
     private void StartConnectionLoop()
     {
+        if (_disposed) return;
         if (Interlocked.CompareExchange(ref _connectLoopRunning, 1, 0) != 0)
             return;
 
@@ -258,17 +260,16 @@ public class LiveTelemetryState : IAsyncDisposable
                     {
                         break;
                     }
-                    catch (OperationCanceledException ex)
+                    catch (OperationCanceledException)
                     {
                         ConnectionStatus = "Connecting to API telemetry stream...";
                         IsConnected = false;
-                        _logger.LogInformation("Live telemetry connection attempt was cancelled ({Message}); retrying.", ex.Message);
                         OnChange?.Invoke();
 
                         try { await Task.Delay(TimeSpan.FromSeconds(3), _connectionCts.Token); }
                         catch (OperationCanceledException) when (_connectionCts.IsCancellationRequested) { break; }
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!_disposed)
                     {
                         ConnectionStatus = "Connecting to API telemetry stream...";
                         IsConnected = false;
@@ -278,12 +279,16 @@ public class LiveTelemetryState : IAsyncDisposable
                         try { await Task.Delay(TimeSpan.FromSeconds(3), _connectionCts.Token); }
                         catch (OperationCanceledException) when (_connectionCts.IsCancellationRequested) { break; }
                     }
+                    catch (Exception) when (_disposed)
+                    {
+                        break;
+                    }
                 }
             }
             finally
             {
                 Interlocked.Exchange(ref _connectLoopRunning, 0);
-                if (!_connectionCts.IsCancellationRequested &&
+                if (!_disposed && !_connectionCts.IsCancellationRequested &&
                     _hubConnection?.State == HubConnectionState.Disconnected)
                     StartConnectionLoop();
             }
@@ -292,10 +297,19 @@ public class LiveTelemetryState : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _disposed = true;
         await _connectionCts.CancelAsync();
         _bus.OnReading -= HandleBusReading;
-        if (_hubConnection is not null)
-            await _hubConnection.DisposeAsync();
-        _connectionCts.Dispose();
+        try
+        {
+            if (_hubConnection is not null)
+                await _hubConnection.DisposeAsync();
+        }
+        catch (OperationCanceledException) { }
+        catch (ObjectDisposedException) { }
+        finally
+        {
+            _connectionCts.Dispose();
+        }
     }
 }
