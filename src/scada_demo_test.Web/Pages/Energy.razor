@@ -79,7 +79,7 @@ else
         <div class="dash-gateways">
             @foreach (var g in Gateways)
             {
-                <div class="dash-gw connection-card @(g.IsOnline ? "is-online" : "is-offline")">
+                <div class="dash-gw">
                     <div class="dash-gw-main">
                         <span class="dash-gw-name">@g.Name</span>
                         <span class="eg-tag">@g.ExternalId</span>
@@ -122,7 +122,7 @@ else
         <div class="eg-groups">
             @foreach (var c in Cards)
             {
-                    <section class="eg-group connection-card @(c.IsOnline ? "is-online" : "is-offline")">
+                    <section class="eg-group">
                     <div class="eg-head">
                         <div class="eg-title">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -370,6 +370,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         State.OnChange += HandleLiveChange;
+        await State.EnsureConnectedAsync();
         await RefreshAsync();
     }
 

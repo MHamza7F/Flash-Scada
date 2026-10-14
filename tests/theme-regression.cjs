@@ -14,15 +14,15 @@ for (const saved of [null, 'light', 'dark']) {
       window: { matchMedia: () => ({ matches: systemDark, addEventListener: (_, callback) => { listener = callback; } }) }
     };
     vm.runInNewContext(source, context);
-    const expected = saved ?? (systemDark ? 'dark' : 'light');
+    const expected = saved ?? 'light';
     assert.equal(attributes['data-theme'], expected, 'pre-paint theme');
     assert.equal(context.window.theme.initTheme(), expected === 'dark');
-    listener({ matches: !systemDark });
-    assert.equal(attributes['data-theme'], saved ?? (!systemDark ? 'dark' : 'light'));
+    if (listener) listener({ matches: !systemDark });
+    assert.equal(attributes['data-theme'], saved ?? 'light');
     context.window.theme.setTheme(true);
     assert.equal(preference, 'dark');
     assert.equal(attributes['data-theme'], 'dark');
-    listener({ matches: false });
+    if (listener) listener({ matches: false });
     assert.equal(attributes['data-theme'], 'dark', 'explicit preference must win');
   }
 }

@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "src\\scada_demo_test.API\\scada_demo_test.API.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\scada_demo_test.Web\\scada_demo_test.Web.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

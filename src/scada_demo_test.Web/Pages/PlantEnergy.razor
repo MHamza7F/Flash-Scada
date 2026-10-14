@@ -58,7 +58,7 @@
                 <div class="pe-groups">
                     @foreach (var c in Cards)
                     {
-                        <section class="pe-group connection-card @(c.IsOnline ? "is-online" : "is-offline") @(c.IsOnline ? "" : "pe-offline")">
+                        <section class="pe-group">
                             <div class="pe-g-head">@c.Name <span class="pe-tag">@c.TrendTag</span></div>
                             <div class="pe-g-body">
                                 @for (var h = 0; h < 2; h++)
@@ -244,6 +244,7 @@
     protected override async Task OnInitializedAsync()
     {
         State.OnChange += HandleLiveChange;
+        await State.EnsureConnectedAsync();
         await RefreshAsync();
     }
 

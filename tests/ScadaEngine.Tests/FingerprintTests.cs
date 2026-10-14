@@ -14,7 +14,7 @@ public class FingerprintTests
     [InlineData("VORTEX_FLOWMETER")]
     [InlineData("KAIFENG_EM_FLOWMETER")]
     [InlineData("SELEC_POWER_METER")]
-[InlineData(" KAIFENG_FLOWMETER\)]
+    [InlineData("KAIFENG_FLOWMETER")]
     [InlineData("SELEC_POWER_METER")]
     public void EveryDriverIdentifiesAtEveryValidAddress(string key)
     {

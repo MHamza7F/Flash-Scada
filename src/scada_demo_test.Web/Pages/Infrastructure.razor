@@ -48,17 +48,16 @@
                     @foreach (var sensor in FilteredSensors.OrderBy(s => CategoryOrder.IndexOf(CategoryOf(s))).ThenBy(s => s.Name))
                     {
                         var metrics = CardMetrics(sensor).OrderByDescending(x => x.Value.Seen).ToList();
+                        var liveMetrics = FreshMetrics(sensor).OrderByDescending(x => x.Value.Seen).ToList();
                         var online = SensorOnline(sensor);
-                        <button class="sensor-card connection-card @(online ? "is-online" : "is-offline")" @onclick="() => OpenSensor(sensor)">
+                        <button class="sensor-card connection-card @(online ? "is-online" : "is-offline")" @ref="_sensorButtonRefs[sensor.Id]" @onclick="() => OpenSensor(sensor)">
                             <div class="sensor-top">
                                 <span class="slave-label">Slave @sensor.SlaveAddress</span>
                                 <span class="status-badge @(online ? "online" : "offline")">@(online ? "online" : "offline")</span>
                             </div>
-                            <span class="sensor-category">@CategoryOf(sensor)</span>
                             <div class="sensor-symbol" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="8" />
-                                    <path d="M12 8v4l3 2" />
+                                    <path d="M3 13c3.5 0 3.5-6 7-6s3.5 8 7 8 3.5-5 7-5" />
                                 </svg>
                             </div>
                             <h4>@sensor.Name</h4>
@@ -66,14 +65,38 @@
                             @if (online && metrics.Count > 0)
                             {
                                 var metric = metrics[0];
+                                var trendPoints = LiveTrendPoints(sensor, metric.Key);
                                 <div class="reading"><strong>@metric.Value.Value.ToString("0.##")</strong><span>@(metric.Value.Unit ?? "")</span></div>
+                                @if (!string.IsNullOrEmpty(trendPoints))
+                                {
+                                    <svg class="sensor-sparkline" viewBox="0 0 100 24" role="img" aria-label="Recent live trend for @sensor.Name">
+                                        <polyline points="@trendPoints" />
+                                    </svg>
+                                }
                                 <div class="sensor-updated">@metric.Key · Updated @metric.Value.Seen.ToLocalTime().ToString("HH:mm:ss")</div>
                             }
                             else
                             {
                                 <div class="offline-note">@(online ? "No saved reading available" : "No recent sensor data")</div>
                             }
-                            <footer>@(sensor.LatestTimestampUtc.HasValue ? $"Updated {sensor.LatestTimestampUtc.Value.ToLocalTime():HH:mm:ss}" : "No sample available")</footer>
+                            <footer>
+                                @if (online && liveMetrics.Count > 0)
+                                {
+                                    <span>Live · updated @liveMetrics[0].Value.Seen.ToLocalTime().ToString("HH:mm")</span>
+                                }
+                                else if (metrics.Count > 0)
+                                {
+                                    <span>Last sample · @metrics[0].Value.Seen.ToLocalTime().ToString("HH:mm")</span>
+                                }
+                                else if (sensor.LatestTimestampUtc.HasValue)
+                                {
+                                    <span>Last sample · @sensor.LatestTimestampUtc.Value.ToLocalTime().ToString("HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span>Waiting for real sensor data</span>
+                                }
+                            </footer>
                         </button>
                     }
                 </div>
@@ -86,14 +109,18 @@
 {
     <div class="infra-modal-backdrop" @onclick="CloseSensor">
         <div class="infra-modal sensor-detail-modal" role="dialog" aria-modal="true" aria-labelledby="sensor-detail-title" tabindex="-1" @onkeydown="HandleModalKey" @onclick:stopPropagation>
-            <button class="modal-close" autofocus aria-label="Close sensor detail" @onclick="CloseSensor">×</button>
-            <div class="sensor-detail-summary">
-                <div class="infra-eyebrow">Sensor detail</div>
-                <h2 id="sensor-detail-title">@DetailSensor.Name</h2>
-                <p>@DetailSensor.UniqueSensorId · @DriverName(DetailSensor) · @CategoryOf(DetailSensor)</p>
-                <div class="detail-stats">
-                    <div><strong>@DetailValue</strong><span>@DetailUnit</span></div>
-                    <div><strong>@(SensorOnline(DetailSensor) ? "Online" : "Offline / stale")</strong><span>Status</span></div>
+             <div class="sensor-detail-summary">
+                 <div class="sensor-detail-title-row">
+                     <div>
+                         <div class="infra-eyebrow">Sensor detail</div>
+                         <h2 id="sensor-detail-title">@DetailSensor.Name</h2>
+                         <p>@DetailSensor.UniqueSensorId · @DriverName(DetailSensor) · @CategoryOf(DetailSensor)</p>
+                     </div>
+                     <button class="modal-close" aria-label="Close sensor detail" @ref="_modalCloseButton" @onclick="CloseSensor">×</button>
+                 </div>
+                 <div class="detail-stats">
+                     <div><strong>@DetailValue</strong><span>@DetailUnit</span></div>
+                     <div><strong>@(SensorOnline(DetailSensor) ? "Online" : "Offline / stale")</strong><span>Status</span></div>
                     <div><strong>@DetailSensor.SlaveAddress</strong><span>Modbus slave</span></div>
                 </div>
                 <dl class="detail-meta">
@@ -103,25 +130,31 @@
                     <div><dt>Updated</dt><dd>@(DetailSensor.LatestTimestampUtc?.ToLocalTime().ToString("g") ?? "No updated reading")</dd></div>
                 </dl>
             </div>
-            <section class="sensor-history">
-                <h3>Recent history</h3>
-                <div class="sensor-history-scroll">
-                    @if (DetailHistory.Count > 0)
-                    {
-                        <table class="history-table">
-                            <caption>Real samples · primary value (@DetailUnit)</caption>
-                            <thead><tr><th scope="col">Time</th><th scope="col">Value</th></tr></thead>
-                            <tbody>
-                                @foreach (var point in DetailHistory.TakeLast(50).Reverse())
-                                {
-                                    <tr>
-                                        <td>@point.TimestampUtc.ToLocalTime().ToString("g")</td>
-                                        <td>@point.PrimaryValue.ToString("0.##") @(DetailUnit == "No reading" ? "" : DetailUnit)</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
+             <section class="sensor-history">
+                 <div class="sensor-history-heading"><h3>Live trend</h3><span>Actual samples · max @DetailHistoryLimit</span></div>
+                 <div class="sensor-history-scroll">
+                     @if (DetailHistoryLoading)
+                     {
+                         <div class="history-state">Loading recent history…</div>
+                     }
+                     else if (DetailHistoryError is not null)
+                     {
+                         <div class="history-state" role="alert">@DetailHistoryError</div>
+                     }
+                     else if (DetailHistory.Count > 0)
+                     {
+                         <svg class="sensor-trend" viewBox="0 0 720 220" role="img" aria-label="Real sensor trend for @DetailSensor.Name">
+                             <line class="trend-axis" x1="48" y1="18" x2="48" y2="188" />
+                             <line class="trend-axis" x1="48" y1="188" x2="700" y2="188" />
+                             <polyline class="trend-line" points="@TrendPoints" />
+                             @foreach (var point in TrendMarkers) { <circle class="trend-point" cx="@point.X" cy="@point.Y" r="3.5" /> }
+                             <text class="trend-label" x="48" y="210">@TrendStartLabel</text>
+                             <text class="trend-label" x="700" y="210" text-anchor="end">@TrendEndLabel</text>
+                             <text class="trend-label" x="40" y="24" text-anchor="end">@TrendMaxLabel</text>
+                             <text class="trend-label" x="40" y="188" text-anchor="end">@TrendMinLabel</text>
+                         </svg>
+                         <div class="trend-summary">@DetailHistory.Count real samples · @DetailValue @DetailUnit currently shown</div>
+                     }
                     else
                     {
                         <div class="offline-note">No real history samples available.</div>
@@ -133,10 +166,18 @@
 }
 
 @code {
+    private const int DetailHistoryLimit = 50;
     private readonly CancellationTokenSource _disposeCts = new();
     private CancellationTokenSource? _historyCts;
     private long _selectionVersion;
     private long _detailVersion;
+    private bool DetailHistoryLoading;
+    private string? DetailHistoryError;
+    private ElementReference _modalCloseButton;
+    private readonly Dictionary<Guid, ElementReference> _sensorButtonRefs = new();
+    private Guid? _focusReturnSensorId;
+    private bool _focusModalOnRender;
+    private bool _focusReturnOnRender;
     private List<ScadaDemoTestApiClient.GatewayDeviceDto> Devices = new();
     private List<ScadaDemoTestApiClient.AttachedSensorDto> Sensors = new();
     private readonly string[] DeviceFilters = ["All devices", "NORVI controllers", "Gateways"];
@@ -150,23 +191,64 @@
     private IEnumerable<string> CategoriesForSelection => SelectedSensors.Select(CategoryOf).Distinct().OrderBy(c => CategoryOrder.IndexOf(c));
     private string DetailValue => DetailSensor is null ? "—" : SensorOnline(DetailSensor) && CardMetrics(DetailSensor).OrderByDescending(v => v.Value.Seen).FirstOrDefault() is { } m ? m.Value.Value.ToString("0.##") : "—";
     private string DetailUnit => DetailSensor is null ? "No reading" : SensorOnline(DetailSensor) && CardMetrics(DetailSensor).OrderByDescending(v => v.Value.Seen).FirstOrDefault() is { } m ? m.Value.Unit ?? "" : "No reading";
-    protected override async Task OnInitializedAsync() { Live.OnChange += OnLiveChange; await Live.EnsureConnectedAsync(); await RefreshAsync(_disposeCts.Token); _ = RefreshLoopAsync(_disposeCts.Token); }
-    private async Task RefreshLoopAsync(CancellationToken token) { _refreshTimer = new PeriodicTimer(TimeSpan.FromSeconds(5)); try { while (await _refreshTimer.WaitForNextTickAsync(token)) await RefreshAsync(token); } catch (OperationCanceledException) { } catch { /* circuit shutdown */ } }
-    private async Task RefreshAsync(CancellationToken token) { try { var selectionVersion = _selectionVersion; var detailVersion = _detailVersion; var selectedDeviceId = SelectedDevice?.Id; var detailSensorId = DetailSensor?.Id; var devices = await Api.GetGatewayDevicesAsync(); token.ThrowIfCancellationRequested(); var sensors = await Api.GetSensorsAsync(); token.ThrowIfCancellationRequested(); Devices = devices.OrderBy(d => d.Name).ToList(); Sensors = sensors.Where(s => s.IsActive).ToList(); if (_selectionVersion == selectionVersion) SelectedDevice = selectedDeviceId is Guid did ? Devices.FirstOrDefault(d => d.Id == did) : null; else if (SelectedDevice is { } currentDevice) SelectedDevice = Devices.FirstOrDefault(d => d.Id == currentDevice.Id); if (_detailVersion == detailVersion) DetailSensor = detailSensorId is Guid sid ? Sensors.FirstOrDefault(s => s.Id == sid) : null; else if (DetailSensor is { } currentSensor) DetailSensor = Sensors.FirstOrDefault(s => s.Id == currentSensor.Id); if (SelectedDevice is null) DetailSensor = null; Error = null; } catch (OperationCanceledException) { } catch (Exception ex) { if (!token.IsCancellationRequested) Error = $"Infrastructure could not be refreshed: {ex.Message}"; } finally { Loading = false; if (!token.IsCancellationRequested) { try { await InvokeAsync(StateHasChanged); } catch (ObjectDisposedException) { } catch (InvalidOperationException) { } } } }
+    protected override async Task OnInitializedAsync()
+    {
+        Live.OnChange += OnLiveChange;
+        var token = _disposeCts.Token;
+        await Live.EnsureConnectedAsync();
+        if (token.IsCancellationRequested) return;
+        await RefreshAsync(token);
+        if (!token.IsCancellationRequested) _ = RefreshLoopAsync(token);
+    }
+    private async Task RefreshLoopAsync(CancellationToken token) { _refreshTimer = new PeriodicTimer(TimeSpan.FromSeconds(5)); try { while (await _refreshTimer.WaitForNextTickAsync(token)) { if (DetailSensor is not null) continue; await RefreshAsync(token); } } catch (OperationCanceledException) { } catch { /* circuit shutdown */ } }
+    private async Task RefreshAsync(CancellationToken token) { if (DetailSensor is not null) return; try { var selectionVersion = _selectionVersion; var detailVersion = _detailVersion; var selectedDeviceId = SelectedDevice?.Id; var detailSensorId = DetailSensor?.Id; var devicesTask = Api.GetGatewayDevicesAsync(); var sensorsTask = Api.GetSensorsAsync(); await Task.WhenAll(devicesTask, sensorsTask); token.ThrowIfCancellationRequested(); var devices = await devicesTask; var sensors = await sensorsTask; Devices = devices.OrderBy(d => d.Name).ToList(); Sensors = sensors.Where(s => s.IsActive).ToList(); if (_selectionVersion == selectionVersion) SelectedDevice = selectedDeviceId is Guid did ? Devices.FirstOrDefault(d => d.Id == did) : null; else if (SelectedDevice is { } currentDevice) SelectedDevice = Devices.FirstOrDefault(d => d.Id == currentDevice.Id); if (_detailVersion == detailVersion) DetailSensor = detailSensorId is Guid sid ? Sensors.FirstOrDefault(s => s.Id == sid) : null; else if (DetailSensor is { } currentSensor) DetailSensor = Sensors.FirstOrDefault(s => s.Id == currentSensor.Id); if (SelectedDevice is null) DetailSensor = null; Error = null; } catch (OperationCanceledException) { } catch { if (!token.IsCancellationRequested) Error = "Infrastructure could not be refreshed. Please try again."; } finally { Loading = false; if (!token.IsCancellationRequested) { try { await InvokeAsync(StateHasChanged); } catch (ObjectDisposedException) { } catch (InvalidOperationException) { } } } }
     private async void OnLiveChange() { if (_disposeCts.IsCancellationRequested) return; try { await InvokeAsync(StateHasChanged); } catch (ObjectDisposedException) { } catch (InvalidOperationException) { } }
     private void SelectDevice(ScadaDemoTestApiClient.GatewayDeviceDto d) { _selectionVersion++; SelectedDevice = d; SensorQuery = ""; SensorFilter = "All sensors"; CategoryFilter = "All categories"; }
     private void ClearSelection() { _selectionVersion++; _detailVersion++; SelectedDevice = null; DetailSensor = null; }
-    private async Task OpenSensor(ScadaDemoTestApiClient.AttachedSensorDto s) { _detailVersion++; var detailVersion = _detailVersion; _historyCts?.Cancel(); _historyCts?.Dispose(); _historyCts = CancellationTokenSource.CreateLinkedTokenSource(_disposeCts.Token); var token = _historyCts.Token; DetailSensor = s; DetailHistory = new(); try { var history = await Api.GetSensorTelemetryAsync(s.Id, 50); token.ThrowIfCancellationRequested(); if (_detailVersion == detailVersion && DetailSensor?.Id == s.Id) DetailHistory = history; } catch (OperationCanceledException) { } catch { } }
-    private void CloseSensor() { _detailVersion++; _historyCts?.Cancel(); DetailSensor = null; }
+    private async Task OpenSensor(ScadaDemoTestApiClient.AttachedSensorDto s) { CancelHistoryRequest(); _detailVersion++; var detailVersion = _detailVersion; var requestCts = CancellationTokenSource.CreateLinkedTokenSource(_disposeCts.Token); _historyCts = requestCts; var token = requestCts.Token; DetailSensor = s; DetailHistory = new(); DetailHistoryError = null; DetailHistoryLoading = true; _focusReturnSensorId = s.Id; _focusModalOnRender = true; _focusReturnOnRender = false; await InvokeAsync(StateHasChanged); try { var history = await Api.GetSensorTelemetryAsync(s.Id, DetailHistoryLimit).WaitAsync(token); token.ThrowIfCancellationRequested(); if (_detailVersion == detailVersion && DetailSensor?.Id == s.Id) { DetailHistory = NormalizeHistory(history); DetailHistoryError = null; } } catch (OperationCanceledException) { } catch { if (_detailVersion == detailVersion && DetailSensor?.Id == s.Id) DetailHistoryError = "Recent history could not be loaded."; } finally { if (ReferenceEquals(_historyCts, requestCts)) { _historyCts = null; if (_detailVersion == detailVersion && DetailSensor?.Id == s.Id) { DetailHistoryLoading = false; try { await InvokeAsync(StateHasChanged); } catch (ObjectDisposedException) { } catch (InvalidOperationException) { } } } requestCts.Dispose(); } }
+    private void CloseSensor() { _detailVersion++; CancelHistoryRequest(); DetailSensor = null; DetailHistoryLoading = false; DetailHistoryError = null; _focusModalOnRender = false; _focusReturnOnRender = true; }
+    private void CancelHistoryRequest() { var requestCts = _historyCts; _historyCts = null; requestCts?.Cancel(); }
+    private static List<ScadaDemoTestApiClient.SensorReadingDto> NormalizeHistory(IEnumerable<ScadaDemoTestApiClient.SensorReadingDto> history) => history.Where(r => r.TimestampUtc != default && double.IsFinite(r.PrimaryValue) && double.IsFinite(r.SecondaryValue)).GroupBy(r => r.TimestampUtc).Select(g => g.OrderByDescending(r => r.ConnectionStatus).ThenByDescending(r => r.PrimaryValue).ThenByDescending(r => r.SecondaryValue).ThenBy(r => r.ErrorCode ?? string.Empty).First()).OrderBy(r => r.TimestampUtc).TakeLast(DetailHistoryLimit).ToList();
     private void HandleModalKey(KeyboardEventArgs e) { if (e.Key == "Escape") CloseSensor(); }
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (_focusModalOnRender) { _focusModalOnRender = false; try { await _modalCloseButton.FocusAsync(); } catch (InvalidOperationException) { } } else if (_focusReturnOnRender) { _focusReturnOnRender = false; if (_focusReturnSensorId is Guid sensorId && _sensorButtonRefs.TryGetValue(sensorId, out var sensorButton)) { try { await sensorButton.FocusAsync(); } catch (InvalidOperationException) { } } } }
     private void GoToGateway() => Navigation.NavigateTo("/gateway");
     private static bool IsNorvi(ScadaDemoTestApiClient.GatewayDeviceDto d) => d.HardwareType.Contains("norvi", StringComparison.OrdinalIgnoreCase) || d.ProvisionedVia.Contains("norvi", StringComparison.OrdinalIgnoreCase);
     private static string DeviceType(ScadaDemoTestApiClient.GatewayDeviceDto d) => IsNorvi(d) ? "NORVI controller" : "Gateway";
     private static string DriverName(ScadaDemoTestApiClient.AttachedSensorDto s) => (s.DriverDisplayName ?? s.SensorTypeKey).Split('(')[0].Trim();
-    private static string DevicePhoto(ScadaDemoTestApiClient.GatewayDeviceDto d) => IsNorvi(d) ? "/images/norvi.jpeg" : "/images/gateway.jpeg";
+    private static string DevicePhoto(ScadaDemoTestApiClient.GatewayDeviceDto d) => IsNorvi(d) ? "/images/norvi.png" : "/images/gatway.png";
     private string CategoryOf(ScadaDemoTestApiClient.AttachedSensorDto s) { var driver = $"{s.SensorTypeKey} {s.DriverDisplayName}"; var name = s.Name; if (driver.Contains("gas", StringComparison.OrdinalIgnoreCase) || name.Contains("gas", StringComparison.OrdinalIgnoreCase)) return "Gas"; if (driver.Contains("steam", StringComparison.OrdinalIgnoreCase) || name.Contains("steam", StringComparison.OrdinalIgnoreCase) || name.Contains("boiler", StringComparison.OrdinalIgnoreCase)) return "Steam"; if (driver.Contains("ph", StringComparison.OrdinalIgnoreCase) || name.Contains("ph", StringComparison.OrdinalIgnoreCase) || name.Contains("chlor", StringComparison.OrdinalIgnoreCase) || name.Contains("turb", StringComparison.OrdinalIgnoreCase)) return "Water Quality"; if (driver.Contains("temp", StringComparison.OrdinalIgnoreCase) || driver.Contains("humid", StringComparison.OrdinalIgnoreCase) || name.Contains("temperature", StringComparison.OrdinalIgnoreCase)) return "Temperature & RH"; if (driver.Contains("power", StringComparison.OrdinalIgnoreCase) || name.Contains("current", StringComparison.OrdinalIgnoreCase) || name.Contains("vibr", StringComparison.OrdinalIgnoreCase)) return "Electrical & Mechanical"; if (driver.Contains("air", StringComparison.OrdinalIgnoreCase) || name.Contains("pressure", StringComparison.OrdinalIgnoreCase)) return "Air"; if (driver.Contains("flow", StringComparison.OrdinalIgnoreCase) || name.Contains("water", StringComparison.OrdinalIgnoreCase) || name.Contains("level", StringComparison.OrdinalIgnoreCase)) return "Water"; return "Other"; }
     private LiveTelemetryState.MeterState? Snapshot(ScadaDemoTestApiClient.AttachedSensorDto s) => Live.GetMeterSnapshot(s.UniqueSensorId);
     private IEnumerable<KeyValuePair<string, (double Value, string? Unit, DateTime Seen)>> FreshMetrics(ScadaDemoTestApiClient.AttachedSensorDto s) { var snapshot = Snapshot(s); if (snapshot is null) return []; var selected = SelectedMetricKeys(s); var cutoff = DateTime.UtcNow.AddSeconds(-60); return snapshot.Values.Where(v => selected.Contains(v.Key) && v.Value.Seen >= cutoff); }
+    private string LiveTrendPoints(ScadaDemoTestApiClient.AttachedSensorDto sensor, string metric)
+    {
+        var history = Snapshot(sensor)?.History;
+        if (history is null || !history.TryGetValue(metric, out var samples)) return "";
+        var recent = samples.Where(x => x.Seen >= DateTime.UtcNow.AddSeconds(-60)).TakeLast(12).ToList();
+        if (recent.Count < 2) return "";
+
+        var min = recent.Min(x => x.Value);
+        var max = recent.Max(x => x.Value);
+        var span = Math.Max(max - min, Math.Max(Math.Abs(max), 1) * 0.02);
+        return string.Join(" ", recent.Select((sample, index) =>
+            $"{1 + 98d * index / (recent.Count - 1):0.##},{22 - (sample.Value - min) / span * 20:0.##}"));
+    }
+    private sealed record TrendMarker(double X, double Y);
+    private IReadOnlyList<TrendMarker> TrendMarkers => BuildTrendMarkers();
+    private string TrendPoints => string.Join(" ", TrendMarkers.Select(p => $"{p.X:0.##},{p.Y:0.##}"));
+    private string TrendStartLabel => DetailHistory.Count == 0 ? "" : DetailHistory[0].TimestampUtc.ToLocalTime().ToString("HH:mm:ss");
+    private string TrendEndLabel => DetailHistory.Count == 0 ? "" : DetailHistory[^1].TimestampUtc.ToLocalTime().ToString("HH:mm:ss");
+    private string TrendMinLabel => DetailHistory.Count == 0 ? "" : DetailHistory.Min(x => x.PrimaryValue).ToString("0.##");
+    private string TrendMaxLabel => DetailHistory.Count == 0 ? "" : DetailHistory.Max(x => x.PrimaryValue).ToString("0.##");
+    private IReadOnlyList<TrendMarker> BuildTrendMarkers()
+    {
+        if (DetailHistory.Count == 0) return [];
+        var min = DetailHistory.Min(x => x.PrimaryValue);
+        var max = DetailHistory.Max(x => x.PrimaryValue);
+        var span = Math.Max(max - min, Math.Max(Math.Abs(max), 1) * 0.02);
+        return DetailHistory.Select((p, i) => new TrendMarker(
+            48 + (DetailHistory.Count == 1 ? 326 : 652d * i / (DetailHistory.Count - 1)),
+            188 - ((p.PrimaryValue - min) / span * 150))).ToList();
+    }
     private static HashSet<string> SelectedMetricKeys(ScadaDemoTestApiClient.AttachedSensorDto s)
     {
         if (string.IsNullOrWhiteSpace(s.MetricFields))
@@ -201,5 +283,5 @@
         return saved;
     }
     private bool SensorOnline(ScadaDemoTestApiClient.AttachedSensorDto s) => Error is null && s.IsOnline;
-    public void Dispose() { Live.OnChange -= OnLiveChange; _disposeCts.Cancel(); _historyCts?.Cancel(); _historyCts?.Dispose(); _refreshTimer?.Dispose(); _disposeCts.Dispose(); }
+    public void Dispose() { Live.OnChange -= OnLiveChange; _disposeCts.Cancel(); CancelHistoryRequest(); _refreshTimer?.Dispose(); _disposeCts.Dispose(); }
 }

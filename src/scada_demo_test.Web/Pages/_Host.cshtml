@@ -11,13 +11,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ALAM IOT Enterprises - SCADA</title>
     <base href="~/" />
-    <link rel="preload" href="css/site.css" as="style" />
     <link rel="stylesheet" href="css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="scada_demo_test.Web.styles.css" asp-append-version="true" />
     <script src="js/theme.js" asp-append-version="true"></script>
 </head>
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <script src="js/charts.js" asp-append-version="true"></script>
     <script src="_framework/blazor.server.js" autostart="false"></script>
     <script>
         Blazor.start({
@@ -29,6 +29,5 @@
             console.warn('Blazor reconnection note:', err);
         });
     </script>
-    <script src="js/charts.js" defer></script>
 </body>
 </html>

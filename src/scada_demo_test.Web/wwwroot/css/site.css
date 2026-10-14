@@ -687,7 +687,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 }
 
 .status-dot.online { background-color: var(--accent-emerald); }
-.status-dot.offline { background-color: var(--text-light); }
+.status-dot.offline { background-color: var(--accent-rose); }
 
 .status-pill {
   display: inline-flex;
@@ -705,8 +705,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 }
 
 .status-pill.offline {
-  background: var(--bg-card-hover);
-  color: var(--text-muted);
+  background: var(--accent-rose-light);
+  color: var(--accent-rose);
 }
 
 .meter-grid {
@@ -1299,7 +1299,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .tank-percentage-large {
   font-size: 1.3rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-main);
   background: rgba(255, 255, 255, 0.85);
   padding: 2px 8px;
   border-radius: 6px;
@@ -1676,8 +1676,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 }
 
 .code-snippet-box {
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--code-bg, #172832);
+  color: var(--code-fg, #e5f2f2);
   padding: 16px 20px;
   border-radius: var(--radius-md);
   overflow-x: auto;
@@ -2375,16 +2375,9 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sidebar, .app-main, .nav-item, .nav-caret { transition: none; }
-}
-
 /* ---- Device Card Status Animation ---- */
 .device-card { transition: box-shadow .3s ease, transform .2s ease; }
 .device-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.device-card.online { border-top: 4px solid var(--accent-emerald); }
-.device-card.offline { border-top: 4px solid var(--accent-amber); }
-.device-card.error { border-top: 4px solid var(--accent-rose); }
 .status-ring { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
 .pulse-green { background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); animation: pulseGreen 2s infinite; }
 .pulse-amber { background: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber); animation: pulseAmber 2s infinite; }
@@ -2420,11 +2413,6 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
 }
-
-/* Status Tops */
-.device-card.online { border-top: 4px solid var(--accent-emerald); }
-.device-card.offline { border-top: 4px solid var(--accent-amber); }
-.device-card.error { border-top: 4px solid var(--accent-rose); }
 
 .card-top {
     display: flex;
@@ -2564,7 +2552,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 }
 
 .meter-conn-pill.online { background-color: var(--accent-emerald); }
-.meter-conn-pill.offline { background-color: var(--text-light); }
+.meter-conn-pill.offline { background-color: var(--accent-rose); }
 
 .meter-conn-line {
   font-size: 0.78rem;
@@ -2584,7 +2572,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
    ========================================================================== */
 .kpi-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -2903,7 +2891,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 }
 
 .tk-conn-dot.online { background-color: var(--accent-emerald); }
-.tk-conn-dot.offline { background-color: var(--text-light); }
+.tk-conn-dot.offline { background-color: var(--accent-rose); }
 
 .tk-conn-line {
   font-size: 0.76rem;
@@ -2956,7 +2944,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .tank-checkbox {
   width: 18px;
   height: 18px;
-  accent-color: var(--primary-blue);
+  accent-color: var(--control-accent);
   flex-shrink: 0;
   cursor: pointer;
 }
@@ -3012,7 +3000,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 
 .dash-gateways {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 6px;
 }
@@ -3131,10 +3119,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 .pe-kpi small { display: block; color: var(--text-muted); font-size: 10.5px; letter-spacing: 1.1px; text-transform: uppercase; }
 .pe-kpi b { font-size: 23px; font-weight: 700; font-variant-numeric: tabular-nums; display: block; margin-top: 5px; letter-spacing: -.4px; color: var(--primary-blue); }
 .pe-kpi b span { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-left: 5px; }
-.pe-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.pe-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .pe-group { background: var(--bg-surface); border: 2px solid var(--primary-blue); border-radius: 9px; overflow: hidden; box-shadow: 0 2px 10px rgba(2, 132, 199, 0.12); display: flex; flex-direction: column; }
-.pe-group.pe-offline { border-color: #9aa7b5; opacity: .88; }
-.pe-group.pe-offline .pe-g-head { background: linear-gradient(180deg, #8b9aa9, #5f6f7f); }
 .pe-g-head { background: linear-gradient(180deg, var(--pe-navy2), var(--pe-navy)); color: #fff; padding: 10px 16px; text-align: center; font-size: 14px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .pe-tag { font-size: 10px; letter-spacing: 1px; opacity: .9; font-weight: 600; }
 .pe-g-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; flex: 1; }
@@ -3165,7 +3151,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
 
 .eg-groups {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -3231,7 +3217,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   font-size: 10px;
 }
 .eg-head .status-pill.online { background: #16a34a55; border-color: #86efacbb; }
-.eg-head .status-pill.offline { background: #64748b66; border-color: #cbd5e1aa; }
+.eg-head .status-pill.offline { background: var(--accent-rose-light); border-color: var(--accent-rose); color: var(--accent-rose); }
 
 .eg-body {
   display: grid;
@@ -3338,7 +3324,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   flex-shrink: 0;
 }
 .eg-foot-dot.online { background-color: var(--accent-emerald); box-shadow: 0 0 0 3px #22c55e26; }
-.eg-foot-dot.offline { background-color: var(--text-light); }
+.eg-foot-dot.offline { background-color: var(--accent-rose); }
 
 .eg-conn-line { font-weight: 600; color: var(--text-main); }
 .eg-conn-seen { color: var(--text-muted); margin-top: 1px; }
@@ -3351,180 +3337,6 @@ input, select, textarea { font-family: inherit; font-size: inherit; }
   .eg-half { border-right: 0; border-bottom: 1px solid var(--border-color); }
   .eg-half:last-child { border-bottom: 0; }
   .eg-head { font-size: 12px; }
-}
-
-/* ==========================================================================
-   DARK THEME
-   Opt-in via the toggle in the top bar: <html data-theme="dark">.
-   Every --var above is re-declared here so the whole app repaints in one
-   pass - no per-page overrides needed, and no page can forget to opt in.
-   ========================================================================== */
-html[data-theme="dark"],
-body.dark-theme {
-  --bg-body: #101b23;
-  --bg-surface: #172731;
-  --bg-card: #172731;
-  --bg-card-hover: #1c3039;
-  --bg-card-subtle: #152831;
-
-  --border-color: #2c414b;
-  --border-subtle: #213741;
-  --border-strong: #3d5963;
-  --border-focus: #73d4d0;
-  --border: var(--border-color);
-  --text-primary: #e6f0f2;
-
-  --primary-blue: #73d4d0;
-  --primary-blue-hover: #9be5e1;
-  --primary-blue-light: #173f42;
-  --primary-glow: rgba(115, 212, 208, 0.18);
-  --scrim: rgba(0, 0, 0, 0.64);
-
-  --accent-emerald: #63d39b;
-  --accent-emerald-light: #183a31;
-  --accent-amber: #efbb63;
-  --accent-amber-light: #46351c;
-  --accent-rose: #ff8585;
-  --accent-rose-light: #482829;
-  --accent-indigo: #818cf8;
-  --accent-indigo-light: #1e1b4b;
-
-  --text-main: #e6f0f2;
-  --text-body: #c5d9de;
-  --text-muted: #a2b5bd;
-  --text-light: #8298a2;
-
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-  --shadow-dropdown: 0 12px 28px rgba(0, 0, 0, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-html[data-theme="dark"] .topbar,
-body.dark-theme .topbar {
-  background: #0f172a;
-  border-bottom-color: #1e2d44;
-}
-
-html[data-theme="dark"] .sidebar,
-body.dark-theme .sidebar,
-html[data-theme="dark"] .sidebar-brand,
-body.dark-theme .sidebar-brand {
-  background: #0f172a;
-  border-right-color: #1e2d44;
-  border-bottom-color: #1e2d44;
-}
-
-html[data-theme="dark"] .app-footer,
-body.dark-theme .app-footer {
-  background: #0f172a;
-  border-top-color: #1e2d44;
-  color: #94a3b8;
-}
-
-html[data-theme="dark"] .icon-btn,
-body.dark-theme .icon-btn {
-  background: #0e1626;
-  border-color: #1e2d44;
-  color: #e2e8f0;
-}
-
-html[data-theme="dark"] .icon-btn:hover,
-body.dark-theme .icon-btn:hover {
-  background: #16223a;
-  border-color: #2a3d58;
-}
-
-html[data-theme="dark"] .user-menu:hover,
-body.dark-theme .user-menu:hover {
-  background: #16223a;
-}
-
-html[data-theme="dark"] .custom-input,
-html[data-theme="dark"] .custom-select,
-body.dark-theme .custom-input,
-body.dark-theme .custom-select {
-  background: #0e1626;
-  color: #e2e8f0;
-  border-color: #1e2d44;
-}
-
-html[data-theme="dark"] .modal-card,
-body.dark-theme .modal-card {
-  background: #111c2e;
-  border-color: #1e2d44;
-  color: #e2e8f0;
-}
-
-html[data-theme="dark"] .modal-footer,
-body.dark-theme .modal-footer {
-  background: #0e1626;
-  border-top-color: #1e2d44;
-}
-
-html[data-theme="dark"] .sec-card,
-html[data-theme="dark"] .offline-sim-box,
-body.dark-theme .sec-card,
-body.dark-theme .offline-sim-box {
-  background: #0e1626;
-  border-color: #1e2d44;
-}
-
-html[data-theme="dark"] .eg-arc-bg,
-html[data-theme="dark"] .pe-arc-bg,
-body.dark-theme .eg-arc-bg,
-body.dark-theme .pe-arc-bg {
-  stroke: #1e293b;
-}
-
-html[data-theme="dark"] .eg-g-val,
-html[data-theme="dark"] .pe-g-val,
-body.dark-theme .eg-g-val,
-body.dark-theme .pe-g-val {
-  fill: #e2e8f0;
-}
-
-html[data-theme="dark"] .pe-tick-lb,
-html[data-theme="dark"] .eg-tick-lb,
-body.dark-theme .pe-tick-lb,
-body.dark-theme .eg-tick-lb {
-  fill: #94a3b8;
-}
-
-html[data-theme="dark"] .scada-table th,
-body.dark-theme .scada-table th {
-  background: var(--bg-card-subtle);
-  color: var(--text-main);
-  border-bottom: 2px solid var(--border-color);
-}
-
-html[data-theme="dark"] .scada-table tr:hover,
-body.dark-theme .scada-table tr:hover {
-  background: var(--bg-card-hover);
-}
-
-html[data-theme="dark"] .scada-table td,
-body.dark-theme .scada-table td {
-  border-bottom: 1px solid var(--border-color);
-}
-
-html[data-theme="dark"] ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-html[data-theme="dark"] ::-webkit-scrollbar-track {
-  background: var(--bg-body);
-}
-
-html[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 4px;
-}
-
-html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-blue);
 }
 
 /* ---------- Theme toggle button (top bar) ---------- */
@@ -3605,173 +3417,457 @@ body.dark-theme .alert-row-active {
   cursor: not-allowed;
 }
 
+.audit-log-pagination { padding: 16px 18px; }
+.audit-log-pagination .pagination-controls {
+  max-width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 2px;
+}
+.audit-log-pagination .pg-btn {
+  min-width: 40px;
+  min-height: 40px;
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+.audit-log-pagination .pg-ellipsis {
+  padding: 0 3px;
+  color: var(--text-muted);
+}
+
 /* ============================================================================
-   Industrial reference finish
-   The selectors below are intentionally component-level so existing page
-   markup, charts, alarms, and responsive sidebar behavior remain intact.
+   Unified soft-slate / teal theme
+   Keep the existing component selectors above for application compatibility;
+   this is the single final token and state layer used by every surface.
    ============================================================================ */
 :root {
-  --industrial-navy: #0b1c2d;
-  --industrial-teal: #087f82;
-  --industrial-teal-dark: #066467;
-  --industrial-offwhite: #f5f7f6;
-  --industrial-panel: #ffffff;
-  --industrial-ink: #101b23;
-}
-
-html, body { background: var(--bg-body); }
-body { color: var(--text-main); }
-.sidebar, .sidebar-brand { background: var(--industrial-navy); border-color: rgba(210, 231, 235, .14); }
-.sidebar-brand { color: #c6d5dd; }
-.sidebar-brand .brand-title { color: #fff; }
-.sidebar-brand .brand-sub { color: #94e4df; }
-.brand-mark, .sidebar-brand .brand-logo { border-color: rgba(108, 211, 207, .4); background: rgba(21, 130, 132, .2); }
-.sidebar .nav-item { color: #9fb2bc; }
-.sidebar .nav-item:hover, .sidebar .nav-item.active { color: #e7fbfa; background: rgba(40, 166, 164, .14); }
-.sidebar .nav-item.active { box-shadow: inset 3px 0 var(--industrial-teal); }
-.sidebar-footer-slot { border-color: rgba(210, 231, 235, .12); }
-.app-main, .app-shell { background: var(--bg-body); }
-.topbar { background: color-mix(in srgb, var(--bg-surface) 94%, transparent); border-color: var(--border-color); }
-.app-footer { background: var(--bg-surface); border-color: var(--border-color); }
-.glass-card, .meter-card, .stat-card, .overview-stat, .comparison-chart-box, .site-card,
-.content-panel, .modal-card { border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
-.btn-primary-scada, .btn-sm-action-ack { background: var(--industrial-teal); }
-.btn-primary-scada:hover, .btn-sm-action-ack:hover { background: var(--industrial-teal-dark); }
-.btn-secondary-scada, .btn-report, .btn-sm-report, .btn-icon-action, .pg-btn { border-color: var(--border-strong); }
-.search-box, .custom-input, .custom-select { border-color: var(--border-strong); }
-.search-box:focus-within, .custom-input:focus, .custom-select:focus { border-color: var(--industrial-teal); box-shadow: 0 0 0 3px rgba(8, 127, 130, .13); }
-.scada-table thead, .data-table thead { background: var(--bg-card-subtle); }
-.scada-table th, .data-table th { color: var(--text-body); border-color: var(--border-color); }
-.scada-table td, .data-table td { border-color: var(--border-color); }
-.modal-overlay { background: rgba(11, 28, 45, .56); }
-.modal-header, .modal-footer { border-color: var(--border-color); }
-.modal-footer { background: var(--bg-card-subtle); }
-
-/* Follow the OS when there is no explicit user choice. */
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg-body: #101b23; --bg-surface: #172731; --bg-card: #172731; --bg-card-hover: #1c3039; --bg-card-subtle: #152831;
-    --border-color: #2c414b; --border-subtle: #213741; --border-strong: #3d5963; --border-focus: #73d4d0;
-    --text-primary: #e6f0f2; --text-main: #e6f0f2; --text-body: #c5d9de; --text-muted: #a2b5bd; --text-light: #8298a2;
-    --primary-blue: #73d4d0; --primary-blue-hover: #9be5e1; --primary-blue-light: #173f42; --primary-glow: rgba(115, 212, 208, .18);
-    --accent-emerald: #63d39b; --accent-emerald-light: #183a31; --accent-amber: #efbb63; --accent-amber-light: #46351c;
-    --accent-rose: #ff8585; --accent-rose-light: #482829;
-    --shadow-xs: 0 1px 2px rgba(0,0,0,.35); --shadow-sm: 0 2px 8px rgba(0,0,0,.24); --shadow-md: 0 5px 16px rgba(0,0,0,.28);
-  }
-}
-
-/* Later legacy dark selectors used blue surfaces; keep industrial surfaces
-   consistent while preserving semantic alarm colors and SVG/canvas colors. */
-html[data-theme="dark"] .topbar, html[data-theme="dark"] .app-footer,
-body.dark-theme .topbar, body.dark-theme .app-footer { background: var(--bg-surface); border-color: var(--border-color); }
-html[data-theme="dark"] .icon-btn, body.dark-theme .icon-btn { background: var(--bg-card-subtle); border-color: var(--border-color); color: var(--text-main); }
-html[data-theme="dark"] .custom-input, html[data-theme="dark"] .custom-select,
-body.dark-theme .custom-input, body.dark-theme .custom-select { background: var(--bg-card-subtle); color: var(--text-main); border-color: var(--border-strong); }
-
-/* Content surfaces and controls use the reference theme in both modes. */
-.table-card, .chart-card, .comparison-wrapper, .report-builder-card,
-.role-permission-box, .login-card, .tk-card, .pe-wrap {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-}
-.table-responsive, .comparison-chart-box, .chart-badge, .version-tag,
-.latency-pill, .btn-report, .btn-sm-report, .btn-icon-action, .pg-btn,
-.tab-switcher, .chip, .custom-input, .custom-select {
-  background: var(--bg-card-subtle);
-  border-color: var(--border-strong);
-  color: var(--text-main);
-}
-.scada-table thead, .data-table thead, .pagination-bar, .modal-footer,
-.card-footer, .site-metrics-mini, .comp-stat-card, .sec-card,
-.offline-sim-box, .pe-kpi { background: var(--bg-card-subtle); }
-.scada-table tbody tr:hover, .data-table tbody tr:hover,
-.btn-secondary-scada:hover, .btn-report:hover, .btn-sm-report:hover,
-.btn-icon-action:hover, .pg-btn:hover:not(:disabled), .chip:hover {
-  background: var(--bg-card-hover);
-}
-.modal-overlay { background: var(--scrim, rgba(11, 28, 45, .56)); }
-.modal-card, .modal-header, .modal-footer { border-color: var(--border-color); }
-.modal-card { color: var(--text-main); }
-.custom-input:focus, .custom-select:focus, .search-box:focus-within {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px var(--primary-glow);
-}
-.tank-toggle-box { background: var(--primary-blue-light); }
-
-/* Keep the isolated Infrastructure page aligned with the same surface tokens. */
-.infrastructure-page .infra-panel,
-.infrastructure-page .infra-metric,
-.infrastructure-page .gateway-card,
-.infrastructure-page .sensor-card,
-.infrastructure-page .gateway-summary,
-.infrastructure-page .infra-modal {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-  color: var(--text-main);
-}
-.infrastructure-page .infra-toolbar input,
-.infrastructure-page .infra-toolbar select,
-.infrastructure-page .sensor-card.offline,
-.infrastructure-page .offline-note,
-.infrastructure-page .history-table thead {
-  background: var(--bg-card-subtle);
-  color: var(--text-main);
-}
-.infrastructure-page .infra-toolbar,
-.infrastructure-page .infra-panel-heading,
-.infrastructure-page .sensor-group,
-.infrastructure-page .history-table th,
-.infrastructure-page .history-table td { border-color: var(--border-color); }
-/* Explicit connectivity card treatment. Pages opt in only when their card's
-   existing IsOnline/online value is rendered; aggregate containers stay clear. */
-:root {
-  --connection-online-bg: #f0faf3;
-  --connection-online-border: #b9dec5;
-  --connection-offline-bg: #fff4f4;
-  --connection-offline-border: #ebc3c3;
+  color-scheme: light;
+  --bg-body: #edf3f4;
+  --bg-surface: #f8fbfb;
+  --bg-card: #ffffff;
+  --bg-card-hover: #e8f1f1;
+  --bg-card-subtle: #f2f7f7;
+  --border-color: #d3e0e2;
+  --border-subtle: #e3ecee;
+  --border-strong: #afc3c6;
+  --border-focus: #0b7275;
+  --text-primary: #172832;
+  --text-main: #172832;
+  --text-body: #2d414b;
+  --text-muted: #5b7079;
+  --text-light: #70848c;
+  --primary-blue: #0b7275;
+  --primary-blue-hover: #075a5d;
+  --primary-action: #0b7275;
+  --primary-action-hover: #075a5d;
+  --control-accent: #0b7275;
+  --primary-blue-light: #dcefee;
+  --primary-glow: rgba(11, 114, 117, .2);
+  --accent-emerald: #16734d;
+  --accent-emerald-light: #e3f2ea;
+  --accent-amber: #8b5b12;
+  --accent-amber-light: #fff1d7;
+  --accent-rose: #a33d45;
+  --accent-rose-light: #fbe7e8;
+  --accent-indigo: #4d5fb8;
+  --accent-indigo-light: #e7eafd;
+  --scrim: rgba(18, 35, 43, .58);
+  --code-bg: #172832;
+  --code-fg: #e5f2f2;
+  --dashboard-header: #285d66;
+  --dashboard-header-deep: #1b414a;
+  --shadow-xs: 0 1px 2px rgba(23, 40, 50, .05);
+  --shadow-sm: 0 2px 7px rgba(23, 40, 50, .08);
+  --shadow-md: 0 6px 16px rgba(23, 40, 50, .1);
+  --shadow-lg: 0 12px 26px rgba(23, 40, 50, .13);
+  --shadow-dropdown: 0 14px 30px rgba(23, 40, 50, .16);
 }
 
 html[data-theme="dark"], body.dark-theme {
-  --connection-online-bg: #19352b;
-  --connection-online-border: #39745a;
-  --connection-offline-bg: #3a2428;
-  --connection-offline-border: #7d4a50;
+  color-scheme: dark;
+  --bg-body: #101d24;
+  --bg-surface: #15272f;
+  --bg-card: #192f38;
+  --bg-card-hover: #21404a;
+  --bg-card-subtle: #1b353e;
+  --border-color: #304b54;
+  --border-subtle: #263f48;
+  --border-strong: #4a6870;
+  --border-focus: #7bd7d0;
+  --text-primary: #eef8f8;
+  --text-main: #eef8f8;
+  --text-body: #d0e2e3;
+  --text-muted: #a8bec2;
+  --text-light: #8ba5aa;
+  --primary-blue: #7bd7d0;
+  --primary-blue-hover: #a1e6e1;
+  --primary-action: #236f72;
+  --primary-action-hover: #1b5a5d;
+  --control-accent: #7bd7d0;
+  --primary-blue-light: #204a4d;
+  --primary-glow: rgba(123, 215, 208, .24);
+  --accent-emerald: #6ed29e;
+  --accent-emerald-light: #1d4436;
+  --accent-amber: #f0c36d;
+  --accent-amber-light: #49391f;
+  --accent-rose: #ff9298;
+  --accent-rose-light: #4c292f;
+  --accent-indigo: #a3afff;
+  --accent-indigo-light: #292d5d;
+  --scrim: rgba(0, 0, 0, .7);
+  --code-bg: #0d1a21;
+  --code-fg: #d9eeee;
+  --dashboard-header: #245964;
+  --dashboard-header-deep: #173d47;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, .25);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .28);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, .32);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, .36);
+  --shadow-dropdown: 0 16px 34px rgba(0, 0, 0, .46);
 }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) {
-    --connection-online-bg: #19352b;
-    --connection-online-border: #39745a;
-    --connection-offline-bg: #3a2428;
-    --connection-offline-border: #7d4a50;
+  html:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --bg-body: #101d24;
+    --bg-surface: #15272f;
+    --bg-card: #192f38;
+    --bg-card-hover: #21404a;
+    --bg-card-subtle: #1b353e;
+    --border-color: #304b54;
+    --border-subtle: #263f48;
+    --border-strong: #4a6870;
+    --border-focus: #7bd7d0;
+    --text-primary: #eef8f8;
+    --text-main: #eef8f8;
+    --text-body: #d0e2e3;
+    --text-muted: #a8bec2;
+    --text-light: #8ba5aa;
+    --primary-blue: #7bd7d0;
+    --primary-blue-hover: #a1e6e1;
+    --primary-action: #236f72;
+    --primary-action-hover: #1b5a5d;
+    --control-accent: #7bd7d0;
+    --primary-blue-light: #204a4d;
+    --primary-glow: rgba(123, 215, 208, .24);
+    --accent-emerald: #6ed29e;
+    --accent-emerald-light: #1d4436;
+    --accent-amber: #f0c36d;
+    --accent-amber-light: #49391f;
+    --accent-rose: #ff9298;
+    --accent-rose-light: #4c292f;
   }
 }
 
-.connection-card.is-online,
-.connection-card.is-offline {
-  /* keep base card look; status color controlled by badge only */
+html, body { background: var(--bg-body); color: var(--text-main); }
+body { overflow-wrap: anywhere; }
+.app-shell, .app-main { background: var(--bg-body); }
+.sidebar, .sidebar-brand, .topbar, .app-footer { background: var(--bg-surface); border-color: var(--border-color); }
+.sidebar { box-shadow: 2px 0 10px rgba(23, 40, 50, .05); }
+.sidebar .nav-item { color: var(--text-body); }
+.sidebar .nav-item:hover, .sidebar .nav-item.active { color: var(--primary-blue); background: var(--primary-blue-light); }
+.sidebar .nav-item.active { box-shadow: inset 3px 0 var(--primary-blue); }
+.brand-title, .user-name, .page-title, .meter-name, .table-card-header h3,
+.table-card-header h4, .card-header-icon h3, .modal-header h3 { color: var(--text-main); }
+.brand-sub, .view-all-link, .user-role-badge, .view-telemetry-btn { color: var(--primary-blue); }
+
+/* Cards stay neutral; connectivity is communicated by its badge/dot only. */
+.glass-card, .meter-card, .device-card, .stat-card, .overview-stat, .site-card,
+.tk-card, .kpi-card, .dash-gw, .dash-alert, .eg-group, .pe-group,
+.table-card, .chart-card, .comparison-wrapper, .report-builder-card,
+.role-permission-box, .login-card, .modal-card, .infra-panel, .gateway-card,
+.sensor-card, .gateway-summary, .infra-modal { background: var(--bg-card); border-color: var(--border-color); }
+.device-card.online, .device-card.offline, .device-card.error { border-top-color: var(--border-color); }
+.meter-card:hover, .device-card:hover, .tk-card:hover, .eg-group:hover { border-color: var(--border-strong); }
+.connection-card.is-online, .connection-card.is-offline { background: var(--bg-card); }
+
+/* Shared controls, hierarchy, validation and disabled states. */
+.btn-primary-scada, .btn-sm-action-ack, .btn-login, .pg-btn.active { background: var(--primary-action); color: #fff; }
+.btn-primary-scada:hover, .btn-sm-action-ack:hover, .btn-login:hover, .pg-btn.active:hover { background: var(--primary-action-hover); color: #fff; }
+.btn-small:hover { background: var(--primary-action); color: #fff; }
+.btn-secondary-scada, .btn-report, .btn-sm-report, .btn-icon-action, .pg-btn,
+.icon-btn, .tab-switcher, .chip, .latency-pill, .version-tag { background: var(--bg-card-subtle); border-color: var(--border-strong); color: var(--text-body); }
+.btn-secondary-scada:hover, .btn-report:hover, .btn-sm-report:hover, .btn-icon-action:hover,
+.pg-btn:hover:not(:disabled), .chip:hover, .icon-btn:hover { background: var(--bg-card-hover); color: var(--text-main); }
+.search-box, .custom-input, .custom-select { background: var(--bg-card); border-color: var(--border-strong); color: var(--text-main); }
+.custom-input::placeholder, .search-box input::placeholder { color: var(--text-muted); }
+.custom-input:focus, .custom-select:focus, .search-box:focus-within { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--primary-glow); }
+button:disabled, input:disabled, select:disabled, textarea:disabled, .disabled { opacity: .58; cursor: not-allowed; }
+.custom-input:disabled, .custom-select:disabled { background: var(--bg-card-subtle); color: var(--text-muted); }
+.custom-input[aria-invalid="true"], .custom-select[aria-invalid="true"], .is-invalid { border-color: var(--accent-rose); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-rose) 18%, transparent); }
+.validation-message, .field-validation-error, .form-error { color: var(--accent-rose); font-size: .78rem; line-height: 1.4; }
+.form-hint, .page-subtitle, .filter-label, .pagination-info { color: var(--text-muted); }
+.form-group label, .checkbox-label { color: var(--text-body); overflow-wrap: anywhere; }
+
+.scada-table thead, .data-table thead, .pagination-bar, .modal-footer,
+.card-footer, .site-metrics-mini, .comp-stat-card, .sec-card, .offline-sim-box,
+.pe-kpi, .table-responsive { background: var(--bg-card-subtle); }
+.scada-table th, .data-table th { color: var(--text-body); border-color: var(--border-color); }
+.scada-table td, .data-table td { color: var(--text-main); border-color: var(--border-color); }
+.scada-table tbody tr:hover, .data-table tbody tr:hover { background: var(--bg-card-hover); }
+
+.status-pill.online, .level-chip.low { background: var(--accent-emerald-light); color: var(--accent-emerald); }
+.status-pill.offline, .level-chip.high { background: var(--accent-rose-light); color: var(--accent-rose); }
+.status-dot.online, .status-ring.pulse-green, .meter-conn-pill.online, .tk-conn-dot.online, .eg-foot-dot.online { background-color: var(--accent-emerald); }
+.status-dot.offline, .status-ring.pulse-red, .meter-conn-pill.offline, .tk-conn-dot.offline, .eg-foot-dot.offline { background-color: var(--accent-rose); }
+.eg-head, .pe-g-head { background: linear-gradient(180deg, var(--dashboard-header), var(--dashboard-header-deep)); }
+.eg-g-val, .pe-g-val { fill: var(--text-main); }
+.eg-tick-lb, .pe-tick-lb { fill: var(--text-muted); }
+.eg-head .status-pill.offline { background: var(--accent-rose-light); border-color: var(--accent-rose); color: var(--accent-rose); }
+.tank-toggle-box { background: var(--primary-blue-light); border-color: var(--primary-blue); }
+.code-snippet-box { background: var(--code-bg); color: var(--code-fg); }
+.tk-body { background: var(--bg-card-subtle); }
+.infrastructure-page .infra-panel, .infrastructure-page .infra-metric,
+.infrastructure-page .gateway-card, .infrastructure-page .sensor-card,
+.infrastructure-page .gateway-summary, .infrastructure-page .infra-modal {
+  background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);
+}
+.infrastructure-page .infra-toolbar input, .infrastructure-page .infra-toolbar select,
+.infrastructure-page .offline-note, .infrastructure-page .history-table thead {
+  background: var(--bg-card-subtle); color: var(--text-main); border-color: var(--border-color);
+}
+.infrastructure-page .infra-toolbar, .infrastructure-page .infra-panel-heading,
+.infrastructure-page .sensor-group, .infrastructure-page .history-table th,
+.infrastructure-page .history-table td { border-color: var(--border-color); }
+.modal-alert.success, .scada-toast.success { background: var(--accent-emerald-light); color: var(--accent-emerald); border-color: var(--accent-emerald); }
+.modal-alert.error, .scada-toast.error, .login-error-banner { background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose); }
+.modal-alert.warning, .pe-note, .eg-warn { background: var(--accent-amber-light); color: var(--accent-amber); border-color: var(--accent-amber); }
+.alert-toast, .alert-toast.info { background: var(--bg-surface); color: var(--text-main); border-color: var(--border-color); }
+.alert-toast-msg, .alert-msg { color: var(--text-body); }
+.alert-toast-time, .tk-conn-seen, .meter-conn-seen, .dash-gw-seen { color: var(--text-light); }
+.sev-pill.warning { background: var(--accent-amber-light); color: var(--accent-amber); border-color: var(--accent-amber); }
+.sev-pill.critical { background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose); }
+.sev-pill.info { background: var(--primary-blue-light); color: var(--primary-blue); border-color: var(--primary-blue); }
+
+/* Dialog headers and footers remain visible while only the body scrolls. */
+.modal-overlay { background: var(--scrim); }
+.modal-card { min-width: 0; min-height: 0; max-height: calc(100dvh - 32px); }
+.modal-header, .modal-footer { flex-shrink: 0; border-color: var(--border-color); }
+.modal-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.modal-header h3, .modal-footer button, .modal-footer .btn { overflow-wrap: anywhere; }
+
+.theme-toggle { color: var(--text-muted); }
+.theme-toggle:hover { background: var(--bg-card-hover); color: var(--text-main); }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
+.sidebar .nav-item:focus-visible { outline-offset: -2px; }
+
+@media (max-width: 640px) {
+  .modal-overlay { align-items: flex-start; padding: 12px; overflow-y: auto; }
+  .modal-card { width: 100%; max-height: calc(100dvh - 24px); border-radius: var(--radius-lg); }
+  .modal-header, .modal-body, .modal-footer { padding-left: 16px; padding-right: 16px; }
+  .modal-footer { flex-wrap: wrap; }
+  .modal-footer > * { min-width: 0; max-width: 100%; }
 }
 
-/* Keep card tint visible through structural insets while retaining chart color. */
-.connection-card > .meter-card-header,
-.connection-card > .meter-reading,
-.connection-card > .meter-conn,
-.connection-card > .tk-header,
-.connection-card > .tk-body,
-.connection-card > .tk-conn,
-.connection-card > .dash-gw-main,
-.connection-card > .dash-gw-meta,
-.connection-card > .dash-gw-seen,
-.connection-card > .eg-body,
-.connection-card > .eg-foot,
-.connection-card > .pe-g-body,
-.connection-card > .pe-foot { background-color: transparent; }
-
-.connection-card > .eg-head,
-.connection-card > .pe-g-head {
-  background: color-mix(in srgb, var(--connection-card-bg) 72%, #075985 28%);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pulse-green, .pulse-amber, .pulse-red, .alert-toast-dot { animation: none !important; }
 }
 
-.connection-card.gw-device-card > div:last-child,
-.connection-card.gw-device-card > div:first-child > div:first-child { background-color: color-mix(in srgb, var(--connection-card-bg) 78%, transparent) !important; }
+/* Native controls use the same teal accent in both themes. The browser keeps
+   its native checked mark, while color-scheme selects a contrasting mark. */
+input[type="checkbox"] {
+  accent-color: var(--control-accent);
+}
+
+.gateway-action-icon,
+.gateway-alert-icon,
+.gateway-close-icon,
+.status-icon svg,
+.status-indicator-icon,
+.gateway-chevron,
+.modal-close svg {
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: -0.14em;
+}
+
+.gateway-action-icon { flex: 0 0 auto; }
+.gateway-alert-icon { flex: 0 0 auto; }
+.gateway-close-icon { width: 1.1em; height: 1.1em; }
+.status-icon, .status-indicator-icon,
+.gateway-action-icon, .gateway-alert-icon { display: inline-flex; align-items: center; gap: .3rem; }
+.modal-alert, .scada-toast { display: flex; align-items: center; gap: .3rem; }
+.status-indicator-icon { width: .85em; height: .85em; fill: currentColor; stroke: none; vertical-align: -0.08em; }
+.gateway-chevron { width: 1em; height: 1em; }
+.toast-close .gateway-close-icon, .toast-close svg, .modal-close svg { width: 1.05em; height: 1.05em; }
+
+/* ---------- Final responsive layout and control finish ---------- */
+.summary-metrics-cards {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Keep live sensor, energy and gateway cards readable at desktop widths. */
+@media (max-width: 1180px) {
+  .dash-gateways, .eg-groups, .pe-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .kpi-strip, .summary-metrics-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .dash-gateways, .eg-groups, .pe-groups,
+  .kpi-strip, .summary-metrics-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Selects use the same bordered, theme-aware surface as inputs while keeping
+   a visible indicator in browsers that do not draw native arrows in dark mode. */
+select, .custom-select, .infra-toolbar select {
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: light;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-strong);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2.25rem;
+}
+
+option { background: var(--bg-card); color: var(--text-main); }
+html[data-theme="dark"] option, body.dark-theme option { background: var(--bg-card); color: var(--text-main); }
+
+html[data-theme="dark"] select,
+html[data-theme="dark"] .custom-select,
+html[data-theme="dark"] .infra-toolbar select,
+body.dark-theme select,
+body.dark-theme .custom-select,
+body.dark-theme .infra-toolbar select {
+  color-scheme: dark;
+}
+
+select:focus-visible, .custom-select:focus-visible,
+.infra-toolbar select:focus-visible {
+  outline-color: var(--border-focus);
+}
+
+/* The incident feed is intentionally wider than its viewport. The wrapper
+   supplies the accessible horizontal scroll instead of forcing labels into
+   unreadable multi-line columns. */
+.alerts-incident-table, .alerts-rules-table {
+  width: max-content;
+  min-width: 1080px;
+  table-layout: auto;
+}
+.alerts-incident-table th, .alerts-incident-table td,
+.alerts-rules-table th, .alerts-rules-table td {
+  white-space: nowrap;
+}
+.alerts-incident-table th:nth-child(1), .alerts-incident-table td:nth-child(1) { min-width: 100px; }
+.alerts-incident-table th:nth-child(2), .alerts-incident-table td:nth-child(2) { min-width: 190px; }
+.alerts-incident-table th:nth-child(3), .alerts-incident-table td:nth-child(3) { min-width: 135px; }
+.alerts-incident-table th:nth-child(4), .alerts-incident-table td:nth-child(4) { min-width: 120px; }
+.alerts-incident-table th:nth-child(5), .alerts-incident-table td:nth-child(5) { min-width: 260px; white-space: normal; }
+.alerts-incident-table th:nth-child(6), .alerts-incident-table td:nth-child(6) { min-width: 165px; }
+.alerts-incident-table th:nth-child(7), .alerts-incident-table td:nth-child(7) { min-width: 170px; }
+.alerts-incident-table th:nth-child(8), .alerts-incident-table td:nth-child(8) { min-width: 150px; }
+.alerts-rules-table th:nth-child(1), .alerts-rules-table td:nth-child(1) { min-width: 220px; white-space: normal; }
+.alerts-rules-table th:nth-child(2), .alerts-rules-table td:nth-child(2) { min-width: 145px; }
+.alerts-rules-table th:nth-child(3), .alerts-rules-table td:nth-child(3) { min-width: 135px; }
+.alerts-rules-table th:nth-child(4), .alerts-rules-table td:nth-child(4) { min-width: 110px; }
+.alerts-rules-table th:nth-child(5), .alerts-rules-table td:nth-child(5) { min-width: 105px; }
+.alerts-rules-table th:nth-child(6), .alerts-rules-table td:nth-child(6) { min-width: 240px; }
+.alerts-rules-table th:nth-child(7), .alerts-rules-table td:nth-child(7) { min-width: 125px; }
+.alerts-rules-table th:nth-child(8), .alerts-rules-table td:nth-child(8) { min-width: 100px; }
+
+/* All dialogs remain inside the viewport, including pages with legacy inline
+   minimum widths. Only the body/history region scrolls. */
+.modal-card {
+  width: min(100%, 620px);
+  min-width: 0 !important;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+}
+.modal-body { min-height: 0; overflow-x: hidden; overflow-y: auto; }
+.modal-header h3, .modal-body, .modal-footer { overflow-wrap: anywhere; }
+
+/* Native focus remains visible without adding a colored surface to a whole
+   connectivity card. Status color is limited to its pill/dot. */
+.btn-primary-scada, .btn-secondary-scada, .btn-sm-report,
+.btn-sm-action-ack, .btn-icon-action, .pg-btn, .btn-small,
+.infra-filters button, .back-button {
+  border: 1px solid var(--border-strong);
+  color: var(--text-body);
+}
+.btn-primary-scada, .btn-sm-action-ack { border-color: var(--primary-action); color: #fff; }
+.btn-primary-scada:hover, .btn-sm-action-ack:hover { color: #fff; }
+.btn-secondary-scada:hover, .btn-sm-report:hover, .btn-icon-action:hover,
+.pg-btn:hover:not(:disabled), .btn-small:hover, .infra-filters button:hover,
+.back-button:hover { color: var(--text-main); }
+.connection-card.is-online, .connection-card.is-offline,
+.infrastructure-page .connection-card.is-online,
+.infrastructure-page .connection-card.is-offline { background: var(--bg-card); }
+
+/* SVG labels previously used fixed navy/slate values that become muddy in
+   dark mode. Keep the same hierarchy but resolve through theme tokens. */
+.eg-arc-bg, .pe-arc-bg { stroke: var(--border-strong); }
+
+.eg-groups, .pe-groups {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.eg-head, .pe-g-head, .pe-topbar {
+  background: linear-gradient(180deg, var(--primary-action), var(--primary-action-hover));
+}
+.eg-head {
+  flex-wrap: nowrap;
+}
+.eg-title {
+  min-width: 0;
+}
+.eg-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eg-headright {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+.eg-head .status-pill.online {
+  background: var(--accent-emerald-light);
+  border-color: var(--accent-emerald);
+  color: var(--accent-emerald);
+}
+.eg-head .status-pill.offline {
+  background: var(--accent-rose-light);
+  border-color: var(--accent-rose);
+  color: var(--accent-rose);
+}
+@media (max-width: 760px) {
+  .eg-groups, .pe-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .eg-head {
+    gap: 6px;
+  }
+  .eg-headright {
+    gap: 5px;
+  }
+}
+.eg-g-val, .pe-g-val { fill: var(--text-main); }
+.pe-half h3 { color: var(--primary-blue); }
+.pe-row .lbl, .pe-row .val.unit, .pe-empty, .pe-tick-lb { color: var(--text-muted); }
+.pe-tick-lb { fill: var(--text-muted); }

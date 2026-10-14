@@ -243,7 +243,7 @@ private bool IsDarkTheme = false;
             .Select(p => char.ToUpper(p[0])))
             is { Length: > 0 } initials ? initials[..Math.Min(2, initials.Length)] : "SA";
 
-        await LoadDataAsync();
+        _ = LoadDataAsync();
 
         // Theme: honour localStorage first, then the OS preference, then default
         // to light. Applied immediately so the first paint is already correct.
@@ -269,11 +269,25 @@ private bool IsDarkTheme = false;
     {
         try
         {
-            AllDevices = await Api.GetDevicesAsync();
-            AllTanks = await Api.GetTanksAsync();
-            RecentIncidents = await Api.GetAlertIncidentsAsync(10);
+            var devicesTask = Api.GetDevicesAsync();
+            var tanksTask = Api.GetTanksAsync();
+            var incidentsTask = Api.GetAlertIncidentsAsync(10);
+            await Task.WhenAll(devicesTask, tanksTask, incidentsTask);
+
+            AllDevices = await devicesTask;
+            AllTanks = await tanksTask;
+            RecentIncidents = await incidentsTask;
         }
         catch { }
+        finally
+        {
+            if (!_disposed)
+            {
+                try { await InvokeAsync(StateHasChanged); }
+                catch (ObjectDisposedException) { }
+                catch (InvalidOperationException) { }
+            }
+        }
     }
 
     private void ToggleUserMenu() => IsUserMenuOpen = !IsUserMenuOpen;

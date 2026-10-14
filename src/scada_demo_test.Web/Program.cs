@@ -128,12 +128,16 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
 }
 
-app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+// Use the generated static-web-assets endpoints so compressed variants and their
+// cache validators are selected before the Blazor fallback. The runtime manifest
+// is loaded above for direct executable launches from bin/publish output.
+app.MapStaticAssets();
 
 // The classic ServerPrerendered host must issue the cookie before rendering.
 // The subsequent circuit request carries that cookie, so its scoped token also
@@ -153,7 +157,7 @@ app.MapPost("/account/login", async (HttpContext http, IAntiforgery antiforgery,
 {
     // Validate before credentials, session creation, or any API request.
     if (!await antiforgery.IsRequestValidAsync(http))
-        return Results.Redirect("/login?error=" + Uri.EscapeDataString("Your session changed. Please try signing in again."));
+        return Results.BadRequest("Invalid account form. Reload the page and try again.");
 
     var form = await http.Request.ReadFormAsync(http.RequestAborted);
     var email = form["email"].ToString();
@@ -198,7 +202,7 @@ app.MapPost("/account/login", async (HttpContext http, IAntiforgery antiforgery,
 app.MapPost("/account/logout", async (HttpContext http, IAntiforgery antiforgery, ScadaDemoTestApiClient api, WebAuthSessionStore sessions) =>
 {
     if (!await antiforgery.IsRequestValidAsync(http))
-        return Results.Redirect("/dashboard");
+        return Results.BadRequest("Invalid account form. Reload the page and try again.");
 
     var session = sessions.Find(http.User);
     if (session != null)

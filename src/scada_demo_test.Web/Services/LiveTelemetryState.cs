@@ -25,6 +25,7 @@ public class LiveTelemetryState : IAsyncDisposable
         // A metric stops arriving as soon as the operator un-selects it via "Edit
         // Parameters", so entries are pruned when they go stale (max 60s).
         public Dictionary<string, (double Value, string? Unit, DateTime Seen)> Values = new();
+        public Dictionary<string, List<(double Value, string? Unit, DateTime Seen)>> History = new();
     }
 
     private class LiveReading
@@ -72,7 +73,8 @@ public class LiveTelemetryState : IAsyncDisposable
                 FlowRate = m.FlowRate, FlowUnit = m.FlowUnit,
                 Totalizer = m.Totalizer, TotalizerUnit = m.TotalizerUnit,
                 IsOnline = m.IsOnline, LastSeen = m.LastSeen,
-                Values = new(m.Values)
+                Values = new(m.Values),
+                History = m.History.ToDictionary(x => x.Key, x => new List<(double Value, string? Unit, DateTime Seen)>(x.Value))
             };
         }
     }
@@ -84,13 +86,17 @@ public class LiveTelemetryState : IAsyncDisposable
 
     private readonly IConfiguration _config;
     private readonly ITelemetryBroadcastBus _bus;
+    private readonly ILogger<LiveTelemetryState> _logger;
+    private readonly CancellationTokenSource _connectionCts = new();
     private HubConnection? _hubConnection;
     private Task? _startTask;
+    private int _connectLoopRunning;
 
-    public LiveTelemetryState(IConfiguration config, ITelemetryBroadcastBus bus)
+    public LiveTelemetryState(IConfiguration config, ITelemetryBroadcastBus bus, ILogger<LiveTelemetryState> logger)
     {
         _config = config;
         _bus = bus;
+        _logger = logger;
 
         _bus.OnReading += HandleBusReading;
     }
@@ -133,6 +139,17 @@ public class LiveTelemetryState : IAsyncDisposable
         if (seen > DateTime.UtcNow.AddSeconds(5) || !double.IsFinite(value)) return;
         if (meter.Values.TryGetValue(metric, out var previous) && previous.Seen > seen) return;
         meter.Values[metric] = (value, unit, seen);
+        if (!meter.History.TryGetValue(metric, out var history))
+        {
+            history = new();
+            meter.History[metric] = history;
+        }
+        if (history.Count > 0 && history[^1].Seen == seen)
+            history[^1] = (value, unit, seen);
+        else
+            history.Add((value, unit, seen));
+        if (history.Count > 20)
+            history.RemoveAt(0);
 
         // Summary/Charts still consume the device-level flow convenience fields.
         if (metric is "InstantaneousFlowRate" or "FlowRate" or "Flowrate" or "Flow")
@@ -144,15 +161,14 @@ public class LiveTelemetryState : IAsyncDisposable
         if (seen > meter.LastSeen) meter.LastSeen = seen;
     }
 
-    // Safe to call from every page's OnInitializedAsync - only connects once
-    // per circuit, and every caller awaits the same in-flight task.
+    // Start the shared connection without blocking the page's initial render.
     public Task EnsureConnectedAsync()
     {
         _startTask ??= ConnectAsync();
         return _startTask;
     }
 
-    private async Task ConnectAsync()
+    private Task ConnectAsync()
     {
         var apiBaseUrl = _config["ApiBaseUrl"] ?? "http://localhost:5080";
 
@@ -204,68 +220,82 @@ public class LiveTelemetryState : IAsyncDisposable
 
         _hubConnection.Reconnecting += _ => { ConnectionStatus = "Reconnecting..."; IsConnected = false; OnChange?.Invoke(); return Task.CompletedTask; };
         _hubConnection.Reconnected += _ => { ConnectionStatus = "Connected (live)"; IsConnected = true; OnChange?.Invoke(); return Task.CompletedTask; };
-        _hubConnection.Closed += async error =>
+        _hubConnection.Closed += error =>
         {
             ConnectionStatus = "Disconnected";
             IsConnected = false;
             OnChange?.Invoke();
-            await Task.Delay(3000);
-            try
-            {
-                if (_hubConnection.State == HubConnectionState.Disconnected)
-                {
-                    await _hubConnection.StartAsync();
-                    ConnectionStatus = "Connected (live)";
-                    IsConnected = true;
-                    OnChange?.Invoke();
-                }
-            }
-            catch
-            {
-                // Ignored - will retry on next cycle
-            }
+            StartConnectionLoop();
+            return Task.CompletedTask;
         };
 
-        try
-        {
-            await _hubConnection.StartAsync();
-            ConnectionStatus = "Connected (live)";
-            IsConnected = true;
-        }
-        catch
-        {
-            ConnectionStatus = "Connecting to API telemetry stream...";
-            IsConnected = false;
+        ConnectionStatus = "Connecting to API telemetry stream...";
+        StartConnectionLoop();
+        OnChange?.Invoke();
+        return Task.CompletedTask;
+    }
 
-            // Spawn background retry loop
-            _ = Task.Run(async () =>
+    private void StartConnectionLoop()
+    {
+        if (Interlocked.CompareExchange(ref _connectLoopRunning, 1, 0) != 0)
+            return;
+
+        _ = Task.Run(async () =>
+        {
+            try
             {
-                while (_hubConnection.State == HubConnectionState.Disconnected)
+                while (!_connectionCts.IsCancellationRequested &&
+                    _hubConnection?.State == HubConnectionState.Disconnected)
                 {
-                    await Task.Delay(3000);
                     try
                     {
-                        await _hubConnection.StartAsync();
+                        await _hubConnection.StartAsync(_connectionCts.Token);
                         ConnectionStatus = "Connected (live)";
                         IsConnected = true;
                         OnChange?.Invoke();
+                    }
+                    catch (OperationCanceledException) when (_connectionCts.IsCancellationRequested)
+                    {
                         break;
                     }
-                    catch
+                    catch (OperationCanceledException ex)
                     {
-                        // Will retry in next iteration
+                        ConnectionStatus = "Connecting to API telemetry stream...";
+                        IsConnected = false;
+                        _logger.LogInformation("Live telemetry connection attempt was cancelled ({Message}); retrying.", ex.Message);
+                        OnChange?.Invoke();
+
+                        try { await Task.Delay(TimeSpan.FromSeconds(3), _connectionCts.Token); }
+                        catch (OperationCanceledException) when (_connectionCts.IsCancellationRequested) { break; }
+                    }
+                    catch (Exception ex)
+                    {
+                        ConnectionStatus = "Connecting to API telemetry stream...";
+                        IsConnected = false;
+                        _logger.LogWarning("Unable to connect to the live telemetry hub ({Message}); retrying.", ex.Message);
+                        OnChange?.Invoke();
+
+                        try { await Task.Delay(TimeSpan.FromSeconds(3), _connectionCts.Token); }
+                        catch (OperationCanceledException) when (_connectionCts.IsCancellationRequested) { break; }
                     }
                 }
-            });
-        }
-
-        OnChange?.Invoke();
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _connectLoopRunning, 0);
+                if (!_connectionCts.IsCancellationRequested &&
+                    _hubConnection?.State == HubConnectionState.Disconnected)
+                    StartConnectionLoop();
+            }
+        });
     }
 
     public async ValueTask DisposeAsync()
     {
+        await _connectionCts.CancelAsync();
         _bus.OnReading -= HandleBusReading;
         if (_hubConnection is not null)
             await _hubConnection.DisposeAsync();
+        _connectionCts.Dispose();
     }
 }

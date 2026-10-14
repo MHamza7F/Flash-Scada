@@ -1,47 +1,53 @@
-// Theme management for ALAM IOT SCADA
-// The reference palette follows the operating system until the user chooses a mode.
-// Explicit choices are persisted in localStorage.
+// Theme management for ALAM IOT SCADA.
+// Light is the deliberate first-visit default. A user choice is persisted;
+// the operating-system preference never silently changes the application.
+(function () {
+    'use strict';
 
-window.theme = {
-    initTheme: function () {
-        var saved = localStorage.getItem('scada_theme');
-        var isDark = saved === 'dark' || (saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    // Versioned once so an old pre-light-default dark preference cannot make
+    // the first visit appear dark after this release.
+    var STORAGE_KEY = 'scada_theme_v2';
+    var sessionPreference = null;
 
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-        if (document.body) {
+    function readPreference() {
+        try {
+            var storage = window.localStorage || (typeof localStorage !== 'undefined' && localStorage);
+            var value = storage && storage.getItem(STORAGE_KEY);
+            return value === 'dark' || value === 'light' ? value : sessionPreference;
+        } catch (_) {
+            return sessionPreference;
+        }
+    }
+
+    function applyTheme(isDark) {
+        var mode = isDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', mode);
+        if (document.body && document.body.classList) {
             document.body.classList.toggle('dark-theme', isDark);
         }
-        if (!window.theme._systemListener) {
-            window.theme._systemListener = function (event) {
-                // A saved choice always wins; an unset choice tracks the OS.
-                if (localStorage.getItem('scada_theme') == null) {
-                    window.theme.apply(event.matches);
-                }
-            };
-            var media = window.matchMedia('(prefers-color-scheme: dark)');
-            if (media.addEventListener) media.addEventListener('change', window.theme._systemListener);
-            else if (media.addListener) media.addListener(window.theme._systemListener);
-        }
         return isDark;
-    },
-
-    apply: function (isDark) {
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-        if (document.body) document.body.classList.toggle('dark-theme', isDark);
-    },
-
-    setTheme: function (isDark) {
-        var mode = isDark ? 'dark' : 'light';
-        localStorage.setItem('scada_theme', mode);
-        window.theme.apply(isDark);
     }
-};
 
-// Immediate execution in <head> to prevent theme flash:
-(function () {
-    try {
-        var saved = localStorage.getItem('scada_theme');
-        var isDark = saved === 'dark' || (saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    } catch (e) { }
+    window.theme = {
+        initTheme: function () {
+            var saved = readPreference();
+            var isDark = saved === 'dark';
+            applyTheme(isDark);
+            return isDark;
+        },
+
+        apply: applyTheme,
+
+        setTheme: function (isDark) {
+            sessionPreference = isDark ? 'dark' : 'light';
+            try {
+                var storage = window.localStorage || (typeof localStorage !== 'undefined' && localStorage);
+                if (storage) storage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+            } catch (_) { /* blocked storage must not prevent the visual change */ }
+            return applyTheme(!!isDark);
+        }
+    };
+
+    // Immediate execution in <head> prevents a theme flash. No saved choice means light.
+    applyTheme(readPreference() === 'dark');
 })();
